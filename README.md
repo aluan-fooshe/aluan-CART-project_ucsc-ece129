@@ -58,7 +58,8 @@ If you are....
 
 and are interested in reaching out to me and add yourselves to my stakeholders list, email me for further interest;
 
-aluan@ucsc.edu
+```Email:``` aluan@ucsc.edu   
+```Resume:``` [Audrey Luan's Resume](aluan_RESUME.md)
 
 <img src="assets/robotic-cart.png" width="385px" align="center">
 

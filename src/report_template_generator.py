@@ -95,7 +95,7 @@ if __name__ == '__main__':
         school_class="ECE 129A - Capstone pt 1",
         #school_class="ECE 118 - Why this class sucks",
         #report_title="Mechatronics Burn Book",
-        report_title="C.A.R.T. - Carry Assist Robotic Transport",
+        report_title="GenGuard",
         margin_inch=None
     )
     ass.correct_document_pckg()
