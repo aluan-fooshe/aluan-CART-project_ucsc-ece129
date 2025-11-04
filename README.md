@@ -1,59 +1,8 @@
-# aluan-report_temp_generator
-#### ```**⚠️ Note: This README belongs to the aluan-report_temp_generator repository.**```
+# aluan-CART-project_ucsc-ece129
+ 
+>⚠️ Note: This README belongs to the aluan-CART-project_ucsc-ece129
+ repository.
 Python scripts and windows powershell scripts that automatically generate MLA/APA reports and essays for most classes. 
-
-## Important Notes & Updates
-
-----
-#### 1. Incorrect documentation for another repository
-
-The contents that are listed here below was misplaced in the ```aluan-daily_log_entries/README.md```!
-
-- [aluan-daily_log_entries README.md](https://github.com/aluan-fooshe/aluan-daily_log_entries/blob/main/README.md)
-- [aluan-daily_log_entries repository](https://github.com/aluan-fooshe/aluan-daily_log_entries/)
-#### 2. UTF-8 vs UTF-16
-
-The encoding of the ".txt file" is very important to list in this function in Filelist_workbook.py;
-
-    def import_dictionary(self, filename):
-        dictionary = {}
-        item0 = []
-
-        try:
-            f = open(filename, 'r', encoding='utf-16')
-            list = f.readlines()
-            for item in list:
-                item = item.strip('\n')
-                item0.append(item)
-
-**Problem:** The `.txt` file is saved in UTF-16 encoding, but Python's default file reading uses UTF-8 encoding. This mismatch causes garbled text with visible byte order marks (ÿþ) and extra spaces between characters.
-
-**Solution:** Explicitly specify the encoding when opening the file:
-
-    f = open(filename, 'r', encoding='utf-16')
-
-**Note:** Always match the encoding parameter to how the file was actually saved. Common Windows programs may save files in UTF-16, while most modern systems default to UTF-8.
-
-**Documentation worth citing ↓**
-
----
-4.7. UTF-8 mode
-Added in version 3.7.
-
-Windows still uses legacy encodings for the system encoding (the ANSI Code Page). Python uses it for the default encoding of text files (e.g. locale.getencoding()).
-
-This may cause issues because UTF-8 is widely used on the internet and most Unix systems, including WSL (Windows Subsystem for Linux).
-
-You can use the Python UTF-8 Mode to change the default text encoding to UTF-8. You can enable the Python UTF-8 Mode via the -X utf8 command line option, or the PYTHONUTF8=1 environment variable. See PYTHONUTF8 for enabling UTF-8 mode, and Python install manager for how to modify environment variables. [1]
-
----
-Hello giriv_1210,
-
-Good day! Thank you for bringing this to our Microsoft Community Forum.
-
-I understand how frustrating it can be when the same .txt file behaves differently across different systems and versions of Outlook. Let’s work through this together.
-
-The issue you’ve described seems to be related to how Outlook on Windows 11 interprets the encoding of .txt file attachments, defaulting to UTF-16 LE instead of UTF-8. This can cause the file to appear unreadable if the system or application isn’t set to interpret UTF-16 correctly. [2]
 
 ----
 ----
@@ -89,10 +38,11 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 
 ### <b><u>Team Meeting Details</u></b>
 
+[when2meet-team-availability](ttps://www.when2meet.com/?33322720-xyuxH) (set up by ```James Tse```)
+
 #### <b>First Meeting:</b>
-- ```Date & Time:``` TBD
-- ```Meet-up Location:``` Baskin Engineering Courtyard (between buildings B1 and B2)
-- ```Final Location:``` TBD (most likely in a BE room)
+- ```Date & Time:``` Wednesday, November 5 @3:30 – 4:30pm
+- ```Final Location:``` Science and Engineering Library, Room 330
 
 ----
 
@@ -116,6 +66,76 @@ aluan@ucsc.edu
 https://robotics.omron.com/products/mobile-robots/ld-series/ 
 
 ----
+----
+
+## Important Notes & Updates
+
+#### 1. Repository being renamed
+
+The Github repository <span style="color:#2196f3; background-color:#f3e5f5; padding:2px 6px; border-radius:4px;">aluan-report_temp_generator</span> was renamed to <b><span style="color:#DAA520; background-color:#f3e5f5; padding:2px 6px; border-radius:4px;">aluan-CART-project_ucsc-ece129</span></b> due to the CAPSTONE project proposal in the <span style="color:#DAA520;">University of California, Santa Cruz</span>.
+
+```bash
+$ git config --get remote.origin.url
+git@github.com:aluan-fooshe/aluan-report_temp_generator.git
+
+$ mv report_template_generator aluan-CART-project_ucsc-ece129
+```
+
+#### 2. Incorrect documentation for another repository
+
+The contents that are listed here below was misplaced in the ```aluan-daily_log_entries/README.md```!
+
+- [aluan-daily_log_entries README.md](https://github.com/aluan-fooshe/aluan-daily_log_entries/blob/main/README.md)
+- [aluan-daily_log_entries repository](https://github.com/aluan-fooshe/aluan-daily_log_entries/)
+
+#### 3. UTF-8 vs UTF-16
+
+The encoding of the ".txt file" is very important to list in this function in Filelist_workbook.py;
+
+```python
+  def import_dictionary(self, filename):
+      dictionary = {}
+      item0 = []
+
+      try:
+          f = open(filename, 'r', encoding='utf-16')
+          list = f.readlines()
+          for item in list:
+              item = item.strip('\n')
+              item0.append(item)
+```
+
+**Problem:** The `.txt` file is saved in UTF-16 encoding, but Python's default file reading uses UTF-8 encoding. This mismatch causes garbled text with visible byte order marks (ÿþ) and extra spaces between characters.
+
+**Solution:** Explicitly specify the encoding when opening the file:
+
+```python
+  f = open(filename, 'r', encoding='utf-16')
+```
+
+**Note:** Always match the encoding parameter to how the file was actually saved. Common Windows programs may save files in UTF-16, while most modern systems default to UTF-8.
+
+**Documentation worth citing ↓**
+
+---
+4.7. UTF-8 mode
+Added in version 3.7.
+
+Windows still uses legacy encodings for the system encoding (the ANSI Code Page). Python uses it for the default encoding of text files (e.g. locale.getencoding()).
+
+This may cause issues because UTF-8 is widely used on the internet and most Unix systems, including WSL (Windows Subsystem for Linux).
+
+You can use the Python UTF-8 Mode to change the default text encoding to UTF-8. You can enable the Python UTF-8 Mode via the -X utf8 command line option, or the PYTHONUTF8=1 environment variable. See PYTHONUTF8 for enabling UTF-8 mode, and Python install manager for how to modify environment variables. [1]
+
+---
+Hello giriv_1210,
+
+Good day! Thank you for bringing this to our Microsoft Community Forum.
+
+I understand how frustrating it can be when the same .txt file behaves differently across different systems and versions of Outlook. Let’s work through this together.
+
+The issue you’ve described seems to be related to how Outlook on Windows 11 interprets the encoding of .txt file attachments, defaulting to UTF-16 LE instead of UTF-8. This can cause the file to appear unreadable if the system or application isn’t set to interpret UTF-16 correctly. [2]
+
 ----
 ### References
 
