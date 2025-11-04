@@ -10,9 +10,10 @@ Python scripts and windows powershell scripts that automatically generate MLA/AP
 ### ECE 129A CAPSTONE Project Proposal (Fall 2025)
 
   Project 10  
-  C.A.R.T. - Carry Assist Robotic Transport (Robotic Cart)  
+  C.A.R.T. - Carry Assist Robotic Transport (Robotic_Cart_presented-draft.pdf)  
   Project Brief: [Carry_Assist_Robotic_Transport__ProjectBrief.pdf](docs/Carry_Assist_Robotic_Transport__ProjectBrief.pdf)  
-  Presentation: [Carry_Assist_Robotic_Transport__Slideshow.pdf](slides/Carry_Assist_Robotic_Transport__Slideshow.pdf)
+  Presentation (presented in class): [Robotic_Cart_presented-draft.pdf](Robotic_Cart_presented-draft.pdf)  
+  Presentation (revised draft): [Carry_Assist_Robotic_Transport__Slideshow.pdf](slides/Carry_Assist_Robotic_Transport__Slideshow.pdf)
 
 <img src="assets/CART__ProjectBrief_thmbnl.png" width="385px" align="center">
 
@@ -43,7 +44,7 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 #### <b>First Meeting:</b>
 - ```Date & Time:``` Wednesday, November 5 @3:30 – 4:30pm
 - ```Final Location:``` Science and Engineering Library, Room 330
-- ```Meeting Notes``` link to-be-added
+- ```Meeting Notes``` [CART First Project Meeting Notes](https://docs.google.com/document/d/1Mm5sm0tWaWyfTjY2sSdBk_tzSK5iY-w6AVKgav2Nx5k/edit?tab=t.0)
 
 ----
 
@@ -81,6 +82,11 @@ $ git config --get remote.origin.url
 git@github.com:aluan-fooshe/aluan-report_temp_generator.git
 
 $ mv report_template_generator aluan-CART-project_ucsc-ece129
+
+$ git remote -v
+origin  git@github.com:aluan-fooshe/aluan-report_temp_generator.git (fetch)
+origin  git@github.com:aluan-fooshe/aluan-report_temp_generator.git (push)
+
 ```
 
 #### 2. Incorrect documentation for another repository
