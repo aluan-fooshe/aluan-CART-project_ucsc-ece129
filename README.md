@@ -77,6 +77,8 @@ https://robotics.omron.com/products/mobile-robots/ld-series/
 
 The Github repository <span style="color:#2196f3; background-color:#f3e5f5; padding:2px 6px; border-radius:4px;">aluan-report_temp_generator</span> was renamed to <b><span style="color:#DAA520; background-color:#f3e5f5; padding:2px 6px; border-radius:4px;">aluan-CART-project_ucsc-ece129</span></b> due to the CAPSTONE project proposal in the <span style="color:#DAA520;">University of California, Santa Cruz</span>.
 
+The remote link remains unchanged to maintain access for collaborators who are still using the existing repository URL.
+
 ```bash
 $ git config --get remote.origin.url
 git@github.com:aluan-fooshe/aluan-report_temp_generator.git
