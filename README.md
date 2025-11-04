@@ -56,6 +56,7 @@ I understand how frustrating it can be when the same .txt file behaves different
 The issue you’ve described seems to be related to how Outlook on Windows 11 interprets the encoding of .txt file attachments, defaulting to UTF-16 LE instead of UTF-8. This can cause the file to appear unreadable if the system or application isn’t set to interpret UTF-16 correctly. [2]
 
 ----
+----
 ## C.A.R.T. - Carry Assist Robotic Transport
 ### ECE 129A CAPSTONE Project Proposal (Fall 2025)
 
@@ -84,6 +85,16 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 
 <br>
 
+----
+
+### <b><u>Team Meeting Details</u></b>
+
+#### <b>First Meeting:</b>
+- ```Date & Time:``` TBD
+- ```Meet-up Location:``` Baskin Engineering Courtyard (between buildings B1 and B2)
+- ```Final Location:``` TBD (most likely in a BE room)
+
+----
 
 If you are.... 
 - a classmate of mine in **S.C. Petersen**'s class
@@ -104,6 +115,7 @@ aluan@ucsc.edu
 
 https://robotics.omron.com/products/mobile-robots/ld-series/ 
 
+----
 ----
 ### References
 
