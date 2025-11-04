@@ -86,16 +86,13 @@ $ mv report_template_generator aluan-CART-project_ucsc-ece129
 $ git remote -v
 origin  git@github.com:aluan-fooshe/aluan-report_temp_generator.git (fetch)
 origin  git@github.com:aluan-fooshe/aluan-report_temp_generator.git (push)
+
+$ git remote set-url origin git@github.com:aluan-fooshe/aluan/aluan-CART-project_ucsc-ece129
 ```
 
 This repository has been renamed and moved to a new location.
 The old link will continue to redirect automatically, but please update your remote or bookmark to the new address for future use:
 
-```git
-$ git remote set-url origin git@github.com:aluan-fooshe/aluan/aluan-CART-project_ucsc-ece129
-
-
-```
 
 #### 2. Incorrect documentation for another repository
 
