@@ -27,7 +27,7 @@ Many individuals, including delivery workers, university students, and people wi
 Current solutions often rely on cars and trucks, which are inefficient, time-consuming, and impractical for off-road or uneven terrains, especially where parking availability is inconsistent.
 
 ```[Focus_and_Objective]``` 
-To address these challenges, a semi-autonomous robotic cart is propsed to assist individuals in carrying their belongings efficiently and affordably. The embedded system will provide a reliable means of transport across diverse environments while reducing the physical burden of carrying loads.
+To address these challenges, a semi-autonomous robotic cart is proposed to assist individuals in carrying their belongings efficiently and affordably. The embedded system will provide a reliable means of transport across diverse environments while reducing the physical burden of carrying loads.
 
 ```[How]```
 The mechanical and electrical design of the cart will incorporate low-cost motors and materials in order to make it affordable.
@@ -43,6 +43,7 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 #### <b>First Meeting:</b>
 - ```Date & Time:``` Wednesday, November 5 @3:30 – 4:30pm
 - ```Final Location:``` Science and Engineering Library, Room 330
+- ```Meeting Notes``` link to-be-added
 
 ----
 
