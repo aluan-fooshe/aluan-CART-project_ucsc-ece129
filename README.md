@@ -66,6 +66,25 @@ The issue you’ve described seems to be related to how Outlook on Windows 11 in
 
 <img src="CART__ProjectBrief_thmbnl.png" width="385px" align="center">
 
+<br><br>
+<b><u>Brief Summary of C.A.R.T</u></b>
+<br>
+
+```[Problem]```
+Many individuals, including delivery workers, university students, and people with physical disabilities, face significant challenges in reaching various locations due to limited accessibility and the high cost of infrastructure.
+
+```[Stakeholders_and_Why_It_Matters]``` 
+Current solutions often rely on cars and trucks, which are inefficient, time-consuming, and impractical for off-road or uneven terrains, especially where parking availability is inconsistent.
+
+```[Focus_and_Objective]``` 
+To address these challenges, a semi-autonomous robotic cart is propsed to assist individuals in carrying their belongings efficiently and affordably. The embedded system will provide a reliable means of transport across diverse environments while reducing the physical burden of carrying loads.
+
+```[How]```
+The mechanical and electrical design of the cart will incorporate low-cost motors and materials in order to make it affordable.
+
+<br>
+
+
 If you are.... 
 - a classmate of mine in **S.C. Petersen**'s class
 - part of a **STEM-affiliated club**
