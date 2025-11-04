@@ -11,10 +11,10 @@ Python scripts and windows powershell scripts that automatically generate MLA/AP
 
   Project 10  
   C.A.R.T. - Carry Assist Robotic Transport (Robotic Cart)  
-  Project Brief: [Carry_Assist_Robotic_Transport__ProjectBrief.pdf](Carry_Assist_Robotic_Transport__ProjectBrief.pdf)  
-  Presentation: [Carry_Assist_Robotic_Transport__Slideshow.pdf](Carry_Assist_Robotic_Transport__Slideshow.pdf)
+  Project Brief: [Carry_Assist_Robotic_Transport__ProjectBrief.pdf](docs/Carry_Assist_Robotic_Transport__ProjectBrief.pdf)  
+  Presentation: [Carry_Assist_Robotic_Transport__Slideshow.pdf](slides/Carry_Assist_Robotic_Transport__Slideshow.pdf)
 
-<img src="CART__ProjectBrief_thmbnl.png" width="385px" align="center">
+<img src="assets/CART__ProjectBrief_thmbnl.png" width="385px" align="center">
 
 <br><br>
 <b><u>Brief Summary of C.A.R.T</u></b>
@@ -59,7 +59,7 @@ and are interested in reaching out to me and add yourselves to my stakeholders l
 
 aluan@ucsc.edu
 
-<img src="robotic-cart.png" width="385px" align="center">
+<img src="assets/robotic-cart.png" width="385px" align="center">
 
 ----
 
