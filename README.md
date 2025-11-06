@@ -12,7 +12,7 @@ Python scripts and windows powershell scripts that automatically generate MLA/AP
   Project 10  
   C.A.R.T. - Carry Assist Robotic Transport (Robotic_Cart_presented-draft.pdf)  
   Project Brief: [Carry_Assist_Robotic_Transport__ProjectBrief.pdf](docs/Carry_Assist_Robotic_Transport__ProjectBrief.pdf)  
-  Presentation (presented in class): [Robotic_Cart_presented-draft.pdf](Robotic_Cart_presented-draft.pdf)  
+  Presentation (presented in class): [Robotic_Cart_presented-draft.pdf](slides/Robotic_Cart_presented-draft.pdf)  
   Presentation (revised draft): [Carry_Assist_Robotic_Transport__Slideshow.pdf](slides/Carry_Assist_Robotic_Transport__Slideshow.pdf)
 
 <img src="assets/CART__ProjectBrief_thmbnl.png" width="385px" align="center">
@@ -39,9 +39,14 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 
 ### <b><u>Team Meeting Details</u></b>
 
-[when2meet-team-availability](ttps://www.when2meet.com/?33322720-xyuxH) (set up by ```James Tse```)
+#### <b>First Meeting:</b>
+- ```Date & Time:``` Wednesday, November 5 @3:30 – 4:30pm
+- ```Final Location:``` Science and Engineering Library, Room 330
+- ```Meeting Notes``` [CART First Project Meeting Notes](https://docs.google.com/document/d/1Mm5sm0tWaWyfTjY2sSdBk_tzSK5iY-w6AVKgav2Nx5k/edit?tab=t.0), anyone with the link is able to edit and add to the notes.
 
 #### <b>First Meeting:</b>
+- Fill out your time availability for our second meeting;
+- [when2meet-team-availability](ttps://www.when2meet.com/?33322720-xyuxH) (set up by ```James Tse```)
 - ```Date & Time:``` Wednesday, November 5 @3:30 – 4:30pm
 - ```Final Location:``` Science and Engineering Library, Room 330
 - ```Meeting Notes``` [CART First Project Meeting Notes](https://docs.google.com/document/d/1Mm5sm0tWaWyfTjY2sSdBk_tzSK5iY-w6AVKgav2Nx5k/edit?tab=t.0)
