@@ -44,12 +44,12 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 - ```Final Location:``` Science and Engineering Library, Room 330
 - ```Meeting Notes``` [CART First Project Meeting Notes](https://docs.google.com/document/d/1Mm5sm0tWaWyfTjY2sSdBk_tzSK5iY-w6AVKgav2Nx5k/edit?tab=t.0), anyone with the link is able to edit and add to the notes.
 
-#### <b>First Meeting:</b>
+#### <b>Second Meeting:</b>
 - Fill out your time availability for our second meeting;
 - [when2meet-team-availability](ttps://www.when2meet.com/?33322720-xyuxH) (set up by ```James Tse```)
-- ```Date & Time:``` Wednesday, November 5 @3:30 – 4:30pm
-- ```Final Location:``` Science and Engineering Library, Room 330
-- ```Meeting Notes``` [CART First Project Meeting Notes](https://docs.google.com/document/d/1Mm5sm0tWaWyfTjY2sSdBk_tzSK5iY-w6AVKgav2Nx5k/edit?tab=t.0)
+- ```Date & Time:``` To-be-determined
+- ```Final Location:``` To-be-determined
+- ```Meeting Notes``` To-be-added []()
 
 ----
 
@@ -92,7 +92,7 @@ $ git remote -v
 origin  git@github.com:aluan-fooshe/aluan-report_temp_generator.git (fetch)
 origin  git@github.com:aluan-fooshe/aluan-report_temp_generator.git (push)
 
-$ git remote set-url origin git@github.com:aluan-fooshe/aluan/aluan-CART-project_ucsc-ece129
+$ git remote set-url origin git@github.com:aluan-fooshe/aluan/aluan-CART-project_ucsc-ece129.git
 ```
 
 This repository has been renamed and moved to a new location.
