@@ -46,7 +46,7 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 
 #### <b>Second Meeting:</b>
 - Fill out your time availability for our second meeting;
-- [when2meet-team-availability](ttps://www.when2meet.com/?33322720-xyuxH) (set up by ```James Tse```)
+- [NEW WHEN2MEET](https://www.when2meet.com/?33392562-OoX36) (set up by ```James Tse```)
 - ```Date & Time:``` To-be-determined
 - ```Final Location:``` To-be-determined
 - ```Meeting Notes``` To-be-added []()
