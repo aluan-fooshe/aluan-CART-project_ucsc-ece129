@@ -47,9 +47,9 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 #### <b>Second Meeting:</b>
 - Fill out your time availability for our second meeting;
 - [NEW WHEN2MEET](https://www.when2meet.com/?33392562-OoX36) (set up by ```James Tse```)
-- ```Date & Time:``` To-be-determined
-- ```Final Location:``` To-be-determined
-- ```Meeting Notes``` To-be-added []()
+- ```Date & Time:``` Wednesday, November 12 @3:00 - 5:00pm
+- ```Final Location:``` Science and Engineering Library, 3rd floor, anyone with the link is able to edit and add to the notes.
+- ```Meeting Notes``` [CART Second Project Meeting Notes](https://docs.google.com/document/d/1H14FGsnFZHZLYuU6zWBEAOKiCqIhnGkud_gmsAQGj_E/edit?tab=t.0)
 
 ----
 
