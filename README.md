@@ -51,10 +51,13 @@ The mechanical and electrical design of the cart will incorporate low-cost motor
 - ```Final Location:``` Science and Engineering Library, 3rd floor, anyone with the link is able to edit and add to the notes.
 - ```Meeting Notes``` [CART Second Project Meeting Notes](https://docs.google.com/document/d/1H14FGsnFZHZLYuU6zWBEAOKiCqIhnGkud_gmsAQGj_E/edit?tab=t.0)
 
+<br>
+<b>Update: The Robotic CART team has been fully formed.</b>
+<br><br>
+
 ----
 
 If you are.... 
-- a classmate of mine in **S.C. Petersen**'s class
 - part of a **STEM-affiliated club**
   - Slugbotics
   - Rocket Team
@@ -66,6 +69,7 @@ and are interested in reaching out to me and add yourselves to my stakeholders l
 
 ```Email:``` aluan@ucsc.edu   
 ```Resume:``` [Audrey Luan's Resume](aluan_RESUME.md)
+
 
 <img src="assets/robotic-cart.png" width="385px" align="center">
 
