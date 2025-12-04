@@ -2,7 +2,6 @@
  
 >⚠️ Note: This README belongs to the aluan-CART-project_ucsc-ece129
  repository.
-Python scripts and windows powershell scripts that automatically generate MLA/APA reports and essays for most classes. 
 
 ----
 ----
