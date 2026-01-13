@@ -112,3 +112,13 @@ This repository has been renamed and moved to a new location.
 The old link will continue to redirect automatically, but please update your remote or bookmark to the new address for future use:
 
 https://github.com/aluan-fooshe/aluan-CART-project_ucsc-ece129.git
+
+#### 2. Repository moved to another directory
+
+The local repository has been moved to another directory since a shorter file path is more practical than a long one.
+
+**Date Moved:** Monday, January 12, 2026 6:24:44 PM
+
+**Old Filepath:** /c/Users/Audrey/aluan_Github_folder/pycharm-files-PUBLIC/p1_excel_journal/aluan-CART-project_ucsc-ece129/
+
+**New Filepath:** /c/Users/Audrey/aluan_Github_folder/aluan-CART-project_ucsc-ece129/

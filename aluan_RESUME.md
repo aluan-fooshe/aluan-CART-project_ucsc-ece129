@@ -76,10 +76,10 @@ efficient circuit design.
 
 <br>
 <div align="center"><u>Skills</u></div>
-<u>Programming:</u> C++, Python, Verilog, MATLAB, Windows Powershell
-<br><u>Design Tools:</u> Onshape, Autodesk AutoCAD, LTspice     
+<u>Programming:</u> C++, Python, Verilog, MATLAB, Windows Powershell, Git Bash
+<br><u>Design Tools:</u> Onshape, Autodesk AutoCAD, LTspice
 <br><u>Engineering:</u> Circuit Analysis, Mechatronics
-<br><u>Soft Skills:</u> Delegation, Technical Troubleshooting, Strategic planning, Team collaboration.
+<br><u>Soft Skills:</u> Delegation, Technical Troubleshooting, Strategic Planning, Team Collaboration, Technical Writing (Markdown, README)
 <br><br>
 
 <div align="center"><u>Languages</u></div>
