@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="b3a32bd7-92a6-4c19-bf6d-c4efe662adc7" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../aluan_RESUME.md" beforeDir="false" afterPath="$PROJECT_DIR$/../aluan_RESUME.md" afterDir="false" />
+    <list default="true" id="f8371994-31e4-4d00-8ebe-fceafb4a2115" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/basic_cart_statemachine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/src.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -16,7 +22,7 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="36fgyjtEMwtTZS9css3yPn40SB6" />
+  <component name="ProjectId" id="38ug47qpBxK4MJkJcNZJpWK50Bv" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -24,17 +30,19 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main"
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Audrey/aluan_Github_folder/aluan-CART-project_ucsc-ece129/src",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="b3a32bd7-92a6-4c19-bf6d-c4efe662adc7" name="Changes" comment="" />
-      <created>1765403295531</created>
+      <changelist id="f8371994-31e4-4d00-8ebe-fceafb4a2115" name="Changes" comment="" />
+      <created>1769654675456</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1765403295531</updated>
+      <updated>1769654675456</updated>
     </task>
     <servers />
   </component>
