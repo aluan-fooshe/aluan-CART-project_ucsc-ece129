@@ -47,12 +47,15 @@ def display_distance_on_window():
        distance_label.config(fg="red", text="Distance: {} cm\nHi!".format(distance))
        # If the distance is less than 20, set the label text to display "Hi!" in red
 
-   elif distance > 30:
+   elif distance >= 20 and distance < 30:
 
-       distance_label.config(fg="blue", text="Distance: {} cm\nBye!".format(distance))
+       distance_label.config(fg="green", text="Distance: {} cm\n".format(distance))
        # If the distance is greater than 30, set the label text to display "Bye!" in blue
 
-   window.after(1000, measure_distance)  # Schedule the next measurement after 1 second
+   else:
+       distance_label.config(fg="blue", text="Distance: {} cm\nBye!".format(distance))
+
+   window.after(1000, display_distance_on_window)  # Schedule the next measurement after 1 second
 
 
 # Start measuring distance
