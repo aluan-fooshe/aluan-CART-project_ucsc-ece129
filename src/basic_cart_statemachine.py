@@ -41,25 +41,6 @@ def measure_distance():
 
    #distance_label.config(text="Distance: {} cm".format(distance))  # Update the distance label with the new distance
 
-# Start measuring distance
-
-distance = measure_distance()
-
-if distance < 20:
-    distance_label.config(fg="red", text="Distance: {} cm\nHi!".format(distance))
-    # If the distance is less than 20, set the label text to display "Hi!" in red
-
-elif distance > 30:
-
-    distance_label.config(fg="blue", text="Distance: {} cm\nBye!".format(distance))
-    # If the distance is greater than 30, set the label text to display "Bye!" in blue
-
-window.after(1000, measure_distance)  # Schedule the next measurement after 1 second
-
-# Run the Tkinter event loop
-
-window.mainloop()
-
 # -----------------------------------------------
 
 def switch_case(a):
@@ -90,3 +71,22 @@ array1.sort()
 # #  test if switch case actually works
 # for a in array1:
 #     print(switch_case(a))
+
+while (True):
+    # Start measuring distance
+    distance = measure_distance()
+
+    if distance < 20:
+        distance_label.config(fg="red", text="Distance: {} cm\nHi!".format(distance))
+        # If the distance is less than 20, set the label text to display "Hi!" in red
+
+    elif distance > 30:
+
+        distance_label.config(fg="blue", text="Distance: {} cm\nBye!".format(distance))
+        # If the distance is greater than 30, set the label text to display "Bye!" in blue
+
+    window.after(1000, measure_distance)  # Schedule the next measurement after 1 second
+
+    # Run the Tkinter event loop
+
+    window.mainloop()
