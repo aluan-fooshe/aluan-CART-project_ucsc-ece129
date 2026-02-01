@@ -36,8 +36,11 @@ array1 = [1, 2, 3, 2, 2, 1, 1, 1, 1, 3, 3, 3]
 
 
 def measure_distance():
+    return int(sensor.distance * 100)  # Measure the distance and convert it to an integer
 
-   distance = int(sensor.distance * 100)  # Measure the distance and convert it to an integer
+def display_distance_on_window():
+
+   distance = measure_distance()  # Measure the distance and convert it to an integer
    #distance_label.config(text="Distance: {} cm".format(distance))  # Update the distance label with the new distance
 
    if distance < 20:
@@ -54,7 +57,7 @@ def measure_distance():
 
 # Start measuring distance
 
-measure_distance()
+display_distance_on_window()
 
 # Run the Tkinter event loop
 
