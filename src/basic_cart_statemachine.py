@@ -34,6 +34,43 @@ distance_label.pack()  # Add the label to the window
 
 array1 = [1, 2, 3, 2, 2, 1, 1, 1, 1, 3, 3, 3]
 
+
+def measure_distance():
+
+   distance = int(sensor.distance * 100)  # Measure the distance and convert it to an integer
+
+   #distance_label.config(text="Distance: {} cm".format(distance))  # Update the distance label with the new distance
+
+   
+
+   if distance < 20:
+
+       distance_label.config(fg="red", text="Distance: {} cm\nHi!".format(distance))
+
+       # If the distance is less than 20, set the label text to display "Hi!" in red
+
+   elif distance > 30:
+
+       distance_label.config(fg="blue", text="Distance: {} cm\nBye!".format(distance))
+
+       # If the distance is greater than 30, set the label text to display "Bye!" in blue
+
+       
+
+   window.after(1000, measure_distance)  # Schedule the next measurement after 1 second
+
+   
+
+# Start measuring distance
+
+measure_distance()
+
+# Run the Tkinter event loop
+
+window.mainloop()
+
+# -----------------------------------------------
+
 def switch_case(a):
     match a:
         case 1:
@@ -59,6 +96,6 @@ def cart_statemachine(a):
 # Sort the list in place
 array1.sort()
 
-# test if switch case actually works
-for a in array1:
-    print(switch_case(a))
+# #  test if switch case actually works
+# for a in array1:
+#     print(switch_case(a))
