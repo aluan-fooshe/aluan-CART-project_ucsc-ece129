@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from gpiozero import DistanceSensor
 import tkinter as tk
 from tkinter import font
@@ -11,11 +12,18 @@ State Machine for controlling a cart based on distance measurements:
 - OptimalRange: Cart stays in place (20cm <= distance < 30cm)
 - TooFar: Cart moves forward (distance >= 30cm)
 """
+=======
+from gpiozero import DistanceSensor  # Import the DistanceSensor class from the gpiozero library
+import tkinter as tk  # Import the tkinter library for creating the GUI
+from tkinter import font  # Import the font module from tkinter for customizing the font
+from time import sleep  # Import the sleep function from the time module for delay
+>>>>>>> 3b2c2c2 (basic state machine structure works in test_installed_libraries.py)
 
 # Initialize the ultrasonic sensor
 sensor = DistanceSensor(echo=24, trigger=23, max_distance=5)
 
 
+<<<<<<< HEAD
 class CartStateMachine(StateMachine):
     """State machine for cart distance control"""
 
@@ -95,7 +103,17 @@ class CartStateMachine(StateMachine):
             self.update_display("green", "")
         elif state == self.too_far:
             self.update_display("blue", "Bye!")
+=======
+window = tk.Tk()
+window.title("Distance Measurement")
+custom_font = font.Font(size=30)  # Create a custom font object with size 30
+window.geometry("800x400")  # Set the dimensions of the window
 
+distance_label = tk.Label(window, text="Distance: ", anchor='center', font=custom_font)
+# Create a label to display the distance, centered text, and use the custom font
+>>>>>>> 3b2c2c2 (basic state machine structure works in test_installed_libraries.py)
+
+distance_label.pack()  # Add the label to the window
 
 class DistanceSensorGUI:
     """GUI Application for distance sensor with state machine"""
@@ -130,6 +148,7 @@ class DistanceSensorGUI:
         # Initialize state machine
         self.state_machine = CartStateMachine(self.distance_label)
 
+<<<<<<< HEAD
         # Bind state machine events to update state label
         self.state_machine.add_listener(self.on_state_change)
 
@@ -160,3 +179,18 @@ if __name__ == "__main__":
     # Create and run the application
     app = DistanceSensorGUI()
     app.run()
+=======
+   else:
+       distance_label.config(fg="blue", text="Distance: {} cm\nBye!".format(distance))
+
+   window.after(1000, display_distance_on_window)  # Schedule the next measurement after 1 second
+
+
+# Start measuring distance
+
+display_distance_on_window()
+
+# Run the Tkinter event loop
+
+window.mainloop()
+>>>>>>> 3b2c2c2 (basic state machine structure works in test_installed_libraries.py)
