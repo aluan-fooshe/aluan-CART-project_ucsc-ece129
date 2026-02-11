@@ -14,3 +14,17 @@ from statemachine import StateMachine, State
 
 # Initialize the ultrasonic sensor
 sensor = DistanceSensor(echo=24, trigger=23, max_distance=5)
+
+if __name__ == "__main__":
+    print(f"Starting distance sensor readings... (Press Ctrl+C to stop)")
+    
+    try:
+        while True:
+            distance = sensor.distance
+            print(f"Distance: {distance:.3f} meters ({distance * 100:.1f} cm)")
+            sleep(0.5)  # Wait 0.5 seconds between readings
+           
+    except KeyboardInterrupt:
+         print("\nSensor reading stopped.")
+    finally:
+         sensor.close()  # Clean up GPIO resources}")
