@@ -44,10 +44,39 @@ class CartStateMachine_v2(StateMachine):
 			left.to(right)
 	)
 
-	def __init__(self):
+	def __init__(self, left_distance, right_distance):
+		self.left_distance = left_distance
+		self.right_distance = right_distance
 		super().__init__()
 	
-	# to be completed
+	def process_left_right_distances(self):
+		CART_length = 52  # cm
+		hysteresis_bound = CART_length / 2
+
+		""" determines if the person is left or right. 
+				left -> negative		 right -> positive
+				forward -> between -hysteresis_bound and +hysteresis_bound
+		"""
+		diff_value = self.right_distance - self.left_distance
+
+		# determine which state we should be in based on distance in millimeters
+		if diff_value > hysteresis_bound:
+			if not self.current_state == self.right:
+				self.transition_to_right()
+		elif diff_value < -hysteresis_bound:
+			if not self.current_state == self.left:
+				self.transition_to_left()
+		elif self.left_distance > CART_length and self.right_distance > CART_length:
+			if not self.current_state == self.forward:
+				self.transition_to_forward()
+		else:
+			if not self.current_state == self.idle:
+				self.transition_to_idle()	
+
+		# Update display even if state didn't change (distance value updates)
+		self.on_enter_state(self.current_state)
+
+		# --------ADD GUI TO THIS!!!!!---------
 
 class CartPID:
 	def __init__(self, target_distance, kp, ki, kd):
