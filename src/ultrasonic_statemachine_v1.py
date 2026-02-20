@@ -20,7 +20,7 @@ State Machine for controlling a cart based on distance measurements:
 sensor = DistanceSensor(echo=24, trigger=23, max_distance=5)
 
 
-class CartStateMachine(StateMachine):
+class CartStateMachine_v1(StateMachine):
     """State machine for cart distance control"""
 
     # Define states
@@ -70,7 +70,7 @@ class CartStateMachine(StateMachine):
         self.distance_label.config(fg=color, text=display_text)
 
     def measure_distance(self):
-        """Measure distance from sensor"""
+        """Measure distance from sensor in centimeters"""
         return int(sensor.distance * 100)
 
     def process_distance(self):
@@ -133,7 +133,7 @@ class DistanceSensorGUI:
         self.state_label.pack()
 
         # Initialize state machine
-        self.state_machine = CartStateMachine(self.distance_label)
+        self.state_machine = CartStateMachine_v1(self.distance_label)
 
         # Bind state machine events to update state label
         self.state_machine.add_listener(self.on_state_change)
