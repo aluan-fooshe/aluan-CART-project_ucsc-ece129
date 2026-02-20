@@ -75,7 +75,8 @@ class CartStateMachine(StateMachine):
         """Process current distance and transition to appropriate state"""
         distance = self.measure_distance()
 
-        # Determine which state we should be in based on distance
+
+        # Determine which state we should be in based on distance in millimeters
         if distance < 20:
             if not self.current_state == self.too_close:
                 self.move_to_close()
@@ -97,7 +98,6 @@ class CartStateMachine(StateMachine):
             self.update_display("green", "")
         elif state == self.too_far:
             self.update_display("blue", "Bye!")
-
 
 class DistanceSensorGUI:
     """GUI Application for distance sensor with state machine"""
@@ -159,6 +159,19 @@ class DistanceSensorGUI:
 
 
 if __name__ == "__main__":
+    print(f"Starting distance sensor readings... (Press Ctrl+C to stop)")
+        
     # Create and run the application
     app = DistanceSensorGUI()
     app.run()
+
+    # try:
+    #     while True:
+    #         distance = sensor.distance
+    #         print(f"Distance: {distance:.3f} meters ({distance * 100:.1f} cm)")
+    #         sleep(0.5)  # Wait 0.5 seconds between readings
+           
+    # except KeyboardInterrupt:
+    #      print("\nSensor reading stopped.")
+    # finally:
+    #      sensor.close()  # Clean up GPIO resources}")
