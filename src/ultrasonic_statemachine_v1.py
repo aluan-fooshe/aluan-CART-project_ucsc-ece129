@@ -1,5 +1,7 @@
 # CART state machine v1.0 - one ultrasonic sensor only
 
+# CART state machine v1.0 - one ultrasonic sensor only
+
 from gpiozero import DistanceSensor
 import tkinter as tk
 from tkinter import font
@@ -18,7 +20,7 @@ State Machine for controlling a cart based on distance measurements:
 sensor = DistanceSensor(echo=24, trigger=23, max_distance=5)
 
 
-class CartStateMachine(StateMachine):
+class CartStateMachine_v1(StateMachine):
     """State machine for cart distance control"""
 
     # Define states
@@ -68,22 +70,23 @@ class CartStateMachine(StateMachine):
         self.distance_label.config(fg=color, text=display_text)
 
     def measure_distance(self):
-        """Measure distance from sensor"""
+        """Measure distance from sensor in centimeters"""
         return int(sensor.distance * 100)
 
     def process_distance(self):
         """Process current distance and transition to appropriate state"""
         distance = self.measure_distance()
 
-
+        min_val = 50
+        max_val = 150
         # Determine which state we should be in based on distance in millimeters
-        if distance < 20:
+        if distance < min_val:
             if not self.current_state == self.too_close:
                 self.move_to_close()
-        elif 20 <= distance < 30:
+        elif min_val <= distance < max_val:
             if not self.current_state == self.optimal_range:
                 self.move_to_optimal()
-        else:  # distance >= 30
+        else:  # distance >= max_val
             if not self.current_state == self.too_far:
                 self.move_to_far()
 
@@ -123,14 +126,14 @@ class DistanceSensorGUI:
         # Create state label
         self.state_label = tk.Label(
             self.window,
-            text="State: Initializing...",
+            text="State: Initializing...!!",
             anchor='center',
             font=font.Font(size=16)
         )
         self.state_label.pack()
 
         # Initialize state machine
-        self.state_machine = CartStateMachine(self.distance_label)
+        self.state_machine = CartStateMachine_v1(self.distance_label)
 
         # Bind state machine events to update state label
         self.state_machine.add_listener(self.on_state_change)
@@ -147,6 +150,9 @@ class DistanceSensorGUI:
         """Main update loop - processes distance and updates state machine"""
         try:
             self.state_machine.process_distance()
+            #update state on application?
+            state_name = self.state_machine.current_state
+            self.state_label.config(text=f"Current State: {state_name}")
         except Exception as e:
             print(f"Error in update loop: {e}")
 
@@ -164,14 +170,3 @@ if __name__ == "__main__":
     # Create and run the application
     app = DistanceSensorGUI()
     app.run()
-
-    # try:
-    #     while True:
-    #         distance = sensor.distance
-    #         print(f"Distance: {distance:.3f} meters ({distance * 100:.1f} cm)")
-    #         sleep(0.5)  # Wait 0.5 seconds between readings
-           
-    # except KeyboardInterrupt:
-    #      print("\nSensor reading stopped.")
-    # finally:
-    #      sensor.close()  # Clean up GPIO resources}")
