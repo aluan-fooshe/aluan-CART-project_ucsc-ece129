@@ -55,14 +55,19 @@ class CartStateMachine_v2(StateMachine):
 		# self.update_display("green", "IDLE")
 
 	def on_enter_forward(self):
-		"""Called when entering OptimalRange state"""
 		print("State: FORWARD - Cart moving at +1 speed")
 		# self.update_display("red", "FORWARD")
 
+	def on_enter_left(self):
+		print("State: LEFT - Cart moving at +1 speed")
+
+	def on_enter_right(self):
+		print("State: RIGHT - Cart moving at +1 speed")
+
 
 	def process_left_right_distances(self):
-		CART_length = 52  # cm
-		hysteresis_bound = CART_length / 2
+		CART_LENGTH_MM = 52  # mm
+		hysteresis_bound = CART_LENGTH_MM / 2
 
 		""" determines if the person is left or right. 
 				left -> negative		 right -> positive
@@ -77,15 +82,15 @@ class CartStateMachine_v2(StateMachine):
 		elif diff_value < -hysteresis_bound:
 			if not self.current_state == self.left:
 				self.transition_to_left()
-		elif self.left_distance > CART_length and self.right_distance > CART_length:
+		elif self.left_distance > hysteresis_bound and self.right_distance > hysteresis_bound:
 			if not self.current_state == self.forward:
 				self.transition_to_forward()
 		else:
 			if not self.current_state == self.idle:
 				self.transition_to_idle()	
 
-		# Update display even if state didn't change (distance value updates)
-		self.on_enter_state(self.current_state)
+		# # Update display even if state didn't change (distance value updates)
+		# self.on_enter_state(self.current_state)
 
 	def print_curr_state(self):
 		print(self.current_state)
@@ -133,14 +138,17 @@ if __name__ == "__main__":
 	left_sensor = UltrasonicHCSR04(sensor1, 500)
 	right_sensor = UltrasonicHCSR04(sensor2, 500)
 
+	cart = CartStateMachine_v2(left_distance=0, right_distance=0)
+
 	try:
 		while True:
 			left_distance = left_sensor.measure_distance()
 			right_distance = right_sensor.measure_distance()
-			statemachine = CartStateMachine_v2(left_distance, right_distance)
-
+			cart.left_distance = left_distance
+			cart.right_distance = right_distance
+			cart.process_left_right_distances()
 			print(f"Left Distance: {left_distance:<4} cm\t\tRight Distance: {right_distance:<4} cm\t\tleft PID: {CartPID.compute(left_distance):<4} cm\t\tright PID: {CartPID.compute(right_distance):<4} cm")
-			print(f"State: {statemachine.print_curr_state()}")
+			print(f"State: {cart.current_state.id}")
 			sleep(0.5)  # Wait 0.5 seconds between readings
 	except KeyboardInterrupt:
 		print("\nSensor reading stopped.")
