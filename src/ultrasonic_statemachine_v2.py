@@ -114,9 +114,6 @@ class DistanceSensorGUI:
 		self.left_sensor = UltrasonicHCSR04(self.sensor1, 500)
 		self.right_sensor = UltrasonicHCSR04(self.sensor2, 500)
 
-		# Create custom font
-		custom_font = font.Font(size=30)
-
 		# Create state label
 		self.state_label = tk.Label(
 			self.window,
@@ -147,22 +144,21 @@ class DistanceSensorGUI:
 		try:
 			self.left_distance = self.left_sensor.measure_distance()
 			self.right_distance = self.right_sensor.measure_distance()
-			self.state_machine.left_distance = left_distance
-			self.state_machine.right_distance = right_distance
+			self.state_machine.left_distance = self.left_distance
+			self.state_machine.right_distance = self.right_distance
 			self.state_machine.process_left_right_distances()
-			#update state on application?
 			state_name = self.state_machine.current_state
 			self.state_label.config(text=f"Current State: {state_name}")
-		except KeyboardInterrupt:
-			print("\nSensor reading stopped.")
 		except Exception as e:
 			print(f"Error in update loop: {e}")
-		finally:
-			self.sensor1.close()  # Clean up GPIO resources}")
-			self.sensor2.close() 
 
 		# Schedule next update after 1 second
 		self.window.after(1000, self.update_loop)
+
+	def cleanup(self):
+		self.sensor1.close()
+		self.sensor2.close()
+		self.window.destroy()
 
 	def run(self):
 		"""Start the GUI event loop"""
