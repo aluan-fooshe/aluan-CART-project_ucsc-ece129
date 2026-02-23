@@ -48,7 +48,18 @@ class CartStateMachine_v2(StateMachine):
 		self.left_distance = left_distance
 		self.right_distance = right_distance
 		super().__init__()
-	
+
+	def on_enter_idle(self):
+		"""Called when entering IDLE state"""
+		print("State: IDLE - Cart staying in place")
+		# self.update_display("green", "IDLE")
+
+	def on_enter_forward(self):
+		"""Called when entering OptimalRange state"""
+		print("State: FORWARD - Cart moving at +1 speed")
+		# self.update_display("red", "FORWARD")
+
+
 	def process_left_right_distances(self):
 		CART_length = 52  # cm
 		hysteresis_bound = CART_length / 2
@@ -75,6 +86,9 @@ class CartStateMachine_v2(StateMachine):
 
 		# Update display even if state didn't change (distance value updates)
 		self.on_enter_state(self.current_state)
+
+	def print_curr_state(self):
+		print(self.current_state)
 
 		# --------ADD GUI TO THIS!!!!!---------
 
@@ -123,7 +137,10 @@ if __name__ == "__main__":
 		while True:
 			left_distance = left_sensor.measure_distance()
 			right_distance = right_sensor.measure_distance()
+			statemachine = CartStateMachine_v2(left_distance, right_distance)
+
 			print(f"Left Distance: {left_distance:<4} cm\t\tRight Distance: {right_distance:<4} cm\t\tleft PID: {CartPID.compute(left_distance):<4} cm\t\tright PID: {CartPID.compute(right_distance):<4} cm")
+			print(f"State: {statemachine.print_curr_state()}")
 			sleep(0.5)  # Wait 0.5 seconds between readings
 	except KeyboardInterrupt:
 		print("\nSensor reading stopped.")
