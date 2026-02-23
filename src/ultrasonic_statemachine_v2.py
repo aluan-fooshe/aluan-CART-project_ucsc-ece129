@@ -46,28 +46,35 @@ class CartStateMachine_v2(StateMachine):
 			left.to(right)
 	)
 
-	def __init__(self, left_distance, right_distance):
+	def __init__(self, distance_label, left_distance, right_distance):
 		self.left_distance = left_distance
 		self.right_distance = right_distance
+		self.distance_label = distance_label
 		super().__init__()
 
 	def on_enter_idle(self):
 		"""Called when entering IDLE state"""
 		print("State: IDLE - Cart staying in place")
-		# self.update_display("green", "IDLE")
+		self.update_display("green", "IDLE")
 
 	def on_enter_forward(self):
 		print("State: FORWARD - Cart moving at +1 speed")
-		# self.update_display("red", "FORWARD")
+		self.update_display("red", "FORWARD")
 
 	def on_enter_left(self):
 		print("State: LEFT - Cart moving at +1 speed")
-		# self.update_display("red", "LEFT")
+		self.update_display("red", "LEFT")
 
 	def on_enter_right(self):
 		print("State: RIGHT - Cart moving at +1 speed")
-		# self.update_display("red", "RIGHT")
+		self.update_display("red", "RIGHT")
 
+	def update_display(self, color, message):
+		"""Update the GUI display"""
+		display_text = f"L {self.left_distance} cm   R {self.right_distance} cm"
+		if message:
+			display_text += f"\n{message}"
+		self.distance_label.config(fg=color, text=display_text)
 
 	def process_left_right_distances(self):
 		CART_LENGTH_MM = 52  # mm
@@ -101,11 +108,6 @@ class DistanceSensorGUI:
 	"""GUI Application for distance sensor with state machine"""
 
 	def __init__(self):
-		# Initialize the Tkinter window
-		self.window = tk.Tk()
-		self.window.title("Distance Measurement - State Machine")
-		self.window.geometry("800x400")
-
 		# Initialize two ultrasonic sensors, left-to-right
 		self.sensor1 = DistanceSensor(echo=27, trigger=17, max_distance=5)
 		self.sensor2 = DistanceSensor(echo=24, trigger=23, max_distance=5)
@@ -113,6 +115,23 @@ class DistanceSensorGUI:
 		# Initialize the left and right sensors
 		self.left_sensor = UltrasonicHCSR04(self.sensor1, 500)
 		self.right_sensor = UltrasonicHCSR04(self.sensor2, 500)
+
+		# Initialize the Tkinter window
+		self.window = tk.Tk()
+		self.window.title("Distance Measurement - State Machine")
+		self.window.geometry("800x400")
+
+		# Create custom font
+		custom_font = font.Font(size=30)
+
+		# Create distance label
+		self.distance_label = tk.Label(
+			self.window,
+			text="Distance: ",
+			anchor='center',
+			font=custom_font
+		)
+		self.distance_label.pack(expand=True)
 
 		# Create state label
 		self.state_label = tk.Label(
@@ -126,7 +145,7 @@ class DistanceSensorGUI:
 		# Initialize state machine
 		self.left_distance = 0
 		self.right_distance = 0
-		self.state_machine = CartStateMachine_v2(self.left_distance, self.right_distance)
+		self.state_machine = CartStateMachine_v2(self.distance_label, self.left_distance, self.right_distance)
 
 		# Bind state machine events to update state label
 		self.state_machine.add_listener(self.on_state_change)
@@ -198,32 +217,3 @@ if __name__ == "__main__":
 	# Create and run the application
 	app = DistanceSensorGUI()
 	app.run()
-
-	# # Initialize two ultrasonic sensors, left-to-right
-	# sensor1 = DistanceSensor(echo=27, trigger=17, max_distance=5)
-	# sensor2 = DistanceSensor(echo=24, trigger=23, max_distance=5)
-
-	# # kp=1.0, ki=0, kd=0
-	# CartPID = CartPID(target_distance=100, kp=1.0, ki=0, kd=0)
-	# print(f"Starting distance sensor readings... (Press Ctrl+C to stop)")
-
-	# left_sensor = UltrasonicHCSR04(sensor1, 500)
-	# right_sensor = UltrasonicHCSR04(sensor2, 500)
-
-	# cart = CartStateMachine_v2(left_distance=0, right_distance=0)
-
-	# try:
-	# 	while True:
-	# 		left_distance = left_sensor.measure_distance()
-	# 		right_distance = right_sensor.measure_distance()
-	# 		cart.left_distance = left_distance
-	# 		cart.right_distance = right_distance
-	# 		cart.process_left_right_distances()
-	# 		print(f"Left Distance: {left_distance:<4} cm\t\tRight Distance: {right_distance:<4} cm\t\tleft PID: {CartPID.compute(left_distance):<4} cm\t\tright PID: {CartPID.compute(right_distance):<4} cm")
-	# 		print(f"State: {cart.current_state.id}")
-	# 		sleep(0.5)  # Wait 0.5 seconds between readings
-	# except KeyboardInterrupt:
-	# 	print("\nSensor reading stopped.")
-	# finally:
-	# 	sensor1.close()  # Clean up GPIO resources}")
-	# 	sensor2.close() 
