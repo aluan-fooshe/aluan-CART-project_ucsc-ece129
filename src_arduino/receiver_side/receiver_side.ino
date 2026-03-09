@@ -21,6 +21,14 @@ void setup() {
 
 void loop() {
 
+  // static: persists across loop() calls
+  static int  hysteresisCount   = 0;
+  static bool reportedClose     = false;
+
+  // Thresholds: must accumulate N consecutive reads to flip state
+  const int CLOSE_THRESHOLD =  3;   // N strong reads  → report CLOSE
+  const int FAR_THRESHOLD   = -3;   // N weak reads    → report FAR
+
   if (radio.available()) {
 
     // check signal strength BEFORE reading
@@ -39,10 +47,26 @@ void loop() {
       delay(200);
       digitalWrite(LED_PIN, LOW);
 
+      // accumulate evidence of strong / weak signal
       if (strongSignal) {
+        hysteresisCount++;
+      } else {
+        hysteresisCount--;
+      }
+
+      // clamp so the counter doesn't grow unbounded
+      hysteresisCount = constrain(hysteresisCount, FAR_THRESHOLD, CLOSE_THRESHOLD);
+
+      // only flip the reported state once a threshold is reached
+      if (hysteresisCount >= CLOSE_THRESHOLD) {
+        reportedClose = true;
+      } else if (hysteresisCount <= FAR_THRESHOLD) {
+        reportedClose = false;
+      }
+
+      if (reportedClose) {
         Serial.println("Distance: CLOSE");
-      } 
-      else {
+      } else {
         Serial.println("Distance: FAR");
       }
     }
