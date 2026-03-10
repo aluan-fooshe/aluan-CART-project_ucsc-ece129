@@ -1,16 +1,33 @@
 # Testing every newly installed library here
 
-from gpiozero import DigitalInputDevice
-from gpiozero.pins.lgpio import LGPIOFactory
-from gpiozero import Device
+import lgpio
+import time
 
-# Explicitly set lgpio as backend for Pi 5
-Device.pin_factory = LGPIOFactory()
+GREEN_LED = 17   # GPIO 17 (Physical Pin 11)
+RED_LED   = 27   # GPIO 27 (Physical Pin 13)
 
-# Listen for LM293 comparator output (via voltage divider)
-receiver = DigitalInputDevice(24)  # GPIO 24, Pin 18
+h = lgpio.gpiochip_open(4)
+lgpio.gpio_claim_output(h, GREEN_LED)
+lgpio.gpio_claim_output(h, RED_LED)
 
-def signal_detected():
-    print("Ultrasonic signal received!")
+print("Alternating LEDs every 5 seconds... (Ctrl+C to stop)")
 
-receiver.when_activated = signal_detected
+try:
+    while True:
+        # Green ON, Red OFF
+        lgpio.gpio_write(h, GREEN_LED, 1)
+        lgpio.gpio_write(h, RED_LED,   0)
+        print("🟢 Green ON")
+        time.sleep(5)
+
+        # Red ON, Green OFF
+        lgpio.gpio_write(h, GREEN_LED, 0)
+        lgpio.gpio_write(h, RED_LED,   1)
+        print("🔴 Red ON")
+        time.sleep(5)
+
+except KeyboardInterrupt:
+    print("\nStopping...")
+    lgpio.gpio_write(h, GREEN_LED, 0)
+    lgpio.gpio_write(h, RED_LED,   0)
+    lgpio.gpiochip_close(h)
