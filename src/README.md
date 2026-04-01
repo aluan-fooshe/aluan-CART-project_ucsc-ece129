@@ -1,6 +1,8 @@
 # aluan-CART-project_ucsc-ece129
 ## src directory
 
+### radio frequency system tested - works (not fully functional)
+
 ---
 ### basic_cart_statemachine.py
 
