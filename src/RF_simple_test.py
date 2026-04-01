@@ -3,21 +3,36 @@
 # Notes:    A Python implementation of the Arduino RF circuit for the CART project.
 #
 # Author(s): Jayant Dharwakar, Audrey Luan
+#
+# Date Written: 2026-03-31 11:27PM
 # -----------------------------------------------------------------
 
+from pyrf24 import RF24, RF24_PA_MAX, RF24_1MBPS
 import time
-from pyrf24 import RF24, RF24_PA_LOW, RF24_DRIVER
-import lgpio
 
-h = lgpio.gpiochip_open(4)
-for pin in [8, 9, 10, 11, 22]:  # nRF24L01 pins
-    mode = lgpio.gpio_get_mode(h, pin)
-    print(f'GPIO {pin}: mode={mode}')
-lgpio.gpiochip_close(h)
+address = b"\xe1\xf0\xf0\xf0\xf0"
 
-radio = RF24(22, 0)  # CE=GPIO22, CSN=SPI bus 0
+radio = RF24(22, 0)
 if not radio.begin():
-    print('ERROR: nRF24L01 not responding - check wiring')
-else:
-    print('SUCCESS: nRF24L01 connected!')
-    radio.print_details()
+    raise RuntimeError("nRF24 hardware not responding - check wiring")
+
+radio.pa_level = RF24_PA_MAX
+radio.channel = 0x76
+radio.data_rate = RF24_1MBPS
+radio.dynamic_payloads = True
+radio.set_auto_ack(True)
+
+radio.open_rx_pipe(1, address)
+radio.print_details()
+radio.start_listening()
+
+print("Listening on channel 0x76...")
+while True:
+    if radio.available():
+        length = radio.get_dynamic_payload_size()
+        payload = radio.read(length)
+        string = "".join(chr(n) for n in payload if 32 <= n <= 126)
+        print(f"Message: {string}")
+    time.sleep(0.01)
+
+
