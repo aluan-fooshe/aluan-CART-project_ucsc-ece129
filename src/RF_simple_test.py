@@ -7,6 +7,7 @@
 # Date Written: 2026-03-31 11:27PM
 # -----------------------------------------------------------------
 
+import datetime
 from pyrf24 import RF24, RF24_PA_MAX, RF24_1MBPS
 import time
 
@@ -31,8 +32,10 @@ while True:
     if radio.available():
         length = radio.get_dynamic_payload_size()
         payload = radio.read(length)
-        string = "".join(chr(n) for n in payload if 32 <= n <= 126)
-        print(f"Message: {string}")
+        # string = "".join(chr(n) for n in payload if 32 <= n <= 126)
+        string = bytes(payload).decode('utf-8', errors='ignore').rstrip('\x00').strip()
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        print(f"{timestamp}   {string}")
     time.sleep(0.01)
 
 
