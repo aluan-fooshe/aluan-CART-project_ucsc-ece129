@@ -7,6 +7,7 @@ RF24 radio(9, 10);  // CE=9, CSN=10
 // Matches Python: address = b"\xe1\xf0\xf0\xf0\xf0"
 // RF24 stores LSByte first, so 0xF0F0F0F0E1LL = same address
 const uint64_t address = 0xF0F0F0F0E1LL;
+unsigned int msg_instances = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -28,9 +29,9 @@ void setup() {
 }
 
 void loop() {
-  const char text[] = "Hello World!!!";
+  char text[40];
+  snprintf(text, sizeof(text), "%u   Hello World!!!", msg_instances + 1);
 
-  Serial.print("Sending: ");
   Serial.println(text);
 
   bool success = radio.write(&text, sizeof(text));
@@ -38,8 +39,10 @@ void loop() {
   if (success) {
     Serial.println("OK - ACK received");
   } else {
-    Serial.println("FAILED - No ACK (check Pi receiver is running)");
+   // Serial.println("FAILED - No ACK (check Pi receiver is running)");
   }
+
+  msg_instances++;
 
   delay(1000);
 }
