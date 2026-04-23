@@ -5,39 +5,32 @@ SoftwareSerial serial(11, 10); // RX, TX
 RoboClaw roboclaw(&serial, 10000);
 
 #define RC_ADDRESS 0x80
-#define BAUDRATE 9600
+#define BAUDRATE 38400
 
 void setup() {
   Serial.begin(BAUDRATE);  // USB serial for debugging
   serial.begin(BAUDRATE);
   roboclaw.begin(BAUDRATE);
   Serial.println("RoboClaw sketch started");
-
-  // Move forward
-  moveForward(RC_ADDRESS, 64);
-  delay(1000);
-  stopMotors(RC_ADDRESS);
-  delay(200);
-
-  // Move backward
-  moveBackward(RC_ADDRESS, 64);
-  delay(1000);
-  stopMotors(RC_ADDRESS);
-  delay(200);
-
-  // Turn in one direction
-  turnForward(RC_ADDRESS, 64, 32);
-  delay(200);
-  stopMotors(RC_ADDRESS);
-  delay(200);
-
-  // Turn in opposite direction
-  turnForward(RC_ADDRESS, 32, 64);
-  delay(200);
 }
 
 void loop() {
-  stopMotors(RC_ADDRESS);
+  int speed = 30;
+
+  for (int i = 0; i <= speed; i++) {
+    moveForward(RC_ADDRESS, i);
+    delay(50);  // controls how fast it speeds up
+  }
+
+  // Move forward
+  moveForward(RC_ADDRESS, speed);
+  delay(2000);
+
+
+  for (int i = speed; i >= 0; i--) {
+    moveForward(RC_ADDRESS, i);
+    delay(50);  // controls how fast it slows down
+  }
 }
 
 void moveForward(uint8_t address, uint8_t speed){

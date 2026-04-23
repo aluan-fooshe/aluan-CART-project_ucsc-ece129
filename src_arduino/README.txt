@@ -5,6 +5,10 @@ these files were made by Jayant D.
 receiver side
 user side send
 
+## Notes about code process
+
+
+
 ## Basic testing code for Arduino Uno R3 + Roboclaw ST 2x45A
 
 code written on 04/22/2026.
