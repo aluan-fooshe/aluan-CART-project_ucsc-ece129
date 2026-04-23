@@ -4,11 +4,70 @@
 SoftwareSerial serial(11, 10); // RX, TX
 RoboClaw roboclaw(&serial, 10000);
 
+#define RC_ADDRESS 0x80
+#define BAUDRATE 9600
+
 void setup() {
-  serial.begin(38400);
-  roboclaw.begin(38400);
+  Serial.begin(BAUDRATE);  // USB serial for debugging
+  serial.begin(BAUDRATE);
+  roboclaw.begin(BAUDRATE);
+  Serial.println("RoboClaw sketch started");
+
+  // Move forward
+  moveForward(RC_ADDRESS, 64);
+  delay(1000);
+  stopMotors(RC_ADDRESS);
+  delay(200);
+
+  // Move backward
+  moveBackward(RC_ADDRESS, 64);
+  delay(1000);
+  stopMotors(RC_ADDRESS);
+  delay(200);
+
+  // Turn in one direction
+  turnForward(RC_ADDRESS, 64, 32);
+  delay(200);
+  stopMotors(RC_ADDRESS);
+  delay(200);
+
+  // Turn in opposite direction
+  turnForward(RC_ADDRESS, 32, 64);
+  delay(200);
 }
 
 void loop() {
-  roboclaw.ForwardM1(0x80, 64);
+  stopMotors(RC_ADDRESS);
+}
+
+void moveForward(uint8_t address, uint8_t speed){
+  roboclaw.ForwardM1(address, speed);
+  roboclaw.ForwardM2(address, speed);
+}
+
+void moveBackward(uint8_t address, uint8_t speed){
+  roboclaw.BackwardM1(address, speed);
+  roboclaw.BackwardM2(address, speed);
+}
+
+void turnForward(uint8_t address, uint8_t speed1, uint8_t speed2) {
+  int steps = max(speed1, speed2);  // ramp based on the higher target speed
+
+  for (int i = 0; i <= steps; i++) {
+    uint8_t s1 = (speed1 > 0) ? map(i, 0, steps, 0, speed1) : 0;
+    uint8_t s2 = (speed2 > 0) ? map(i, 0, steps, 0, speed2) : 0;
+    roboclaw.ForwardM1(address, s1);
+    roboclaw.ForwardM2(address, s2);
+    delay(20);  // adjust for faster/slower ramp
+  }
+}
+
+void turnBackward(uint8_t address, uint8_t speed1, uint8_t speed2) {
+  roboclaw.BackwardM1(address, speed1);
+  roboclaw.BackwardM2(address, speed2);
+}
+
+void stopMotors(uint8_t address) {
+  roboclaw.ForwardM1(address, 0);
+  roboclaw.ForwardM2(address, 0);
 }

@@ -24,14 +24,38 @@ void setup() {
   Serial.println("Transmitter ready");
 }
 
+// void loop() {
+//   const char text[] = "USER";
+
+//   radio.setChannel(100);
+//   radio.openWritingPipe(address1);
+//   radio.write(&text, sizeof(text));
+
+//   radio.setChannel(110);
+//   radio.openWritingPipe(address2);
+//   radio.write(&text, sizeof(text));
+// }
+
+int packetsSent = 0;
+unsigned long lastMeasure = 0;
+
 void loop() {
   const char text[] = "USER";
 
   radio.setChannel(100);
   radio.openWritingPipe(address1);
   radio.write(&text, sizeof(text));
+  packetsSent++;
 
   radio.setChannel(110);
   radio.openWritingPipe(address2);
   radio.write(&text, sizeof(text));
+  packetsSent++;
+
+  if (millis() - lastMeasure > 1000) {
+    Serial.print("Packets sent: ");
+    Serial.println(packetsSent);
+    packetsSent = 0;
+    lastMeasure = millis();
+  }
 }
