@@ -68,5 +68,42 @@ Flashes the pin HIGH for 1000ms, then LOW for 250ms.
 
 ---
 
+Arduino IDE implementation without Morse library
+
+```cpp
+// basic library building testing
+int pin = 13;
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(pin, OUTPUT);
+}
+
+void loop()
+{
+  dot(); dot(); dot();
+  dash(); dash(); dash();
+  dot(); dot(); dot();
+  delay(3000);
+}
+
+void dot()
+{
+  digitalWrite(pin, HIGH);
+  delay(250);
+  digitalWrite(pin, LOW);
+  delay(250);
+}
+
+void dash()
+{
+  digitalWrite(pin, HIGH);
+  delay(1000);
+  digitalWrite(pin, LOW);
+  delay(250);
+}
+
+```
+
 ## Author
 Created by Audrey — April 27, 2026

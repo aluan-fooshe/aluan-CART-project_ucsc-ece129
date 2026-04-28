@@ -1,31 +1,19 @@
-// basic library building testing
-int pin = 13;
+#include <Morse.h>
+
+Morse morse(13);  // pin 13 (built-in LED on most boards)
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(pin, OUTPUT);
+    morse.begin();
+    Serial.begin(9600);  // initialize serial monitor
 }
 
-void loop()
-{
-  dot(); dot(); dot();
-  dash(); dash(); dash();
-  dot(); dot(); dot();
-  delay(3000);
-}
+void loop() {
+    // SOS: · · · — — — · · ·
+    morse.dot(); morse.dot(); morse.dot();  // S
+    morse.dash(); morse.dash(); morse.dash(); // O
+    morse.dot(); morse.dot(); morse.dot();  // S
 
-void dot()
-{
-  digitalWrite(pin, HIGH);
-  delay(250);
-  digitalWrite(pin, LOW);
-  delay(250);
-}
+    Serial.println("SOS");
 
-void dash()
-{
-  digitalWrite(pin, HIGH);
-  delay(1000);
-  digitalWrite(pin, LOW);
-  delay(250);
+    delay(3000);  // pause before repeating
 }
