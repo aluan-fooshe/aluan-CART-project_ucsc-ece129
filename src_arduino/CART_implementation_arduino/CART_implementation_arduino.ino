@@ -33,14 +33,14 @@ void loop() {
   }
 }
 
-void moveForward(uint8_t address, uint8_t speed){
-  roboclaw.ForwardM1(address, speed);
-  roboclaw.ForwardM2(address, speed);
+void moveForward(uint8_t address, uint8_t target_speed){
+  roboclaw.ForwardM1(address, target_speed);
+  roboclaw.ForwardM2(address, target_speed);
 }
 
-void moveBackward(uint8_t address, uint8_t speed){
-  roboclaw.BackwardM1(address, speed);
-  roboclaw.BackwardM2(address, speed);
+void moveBackward(uint8_t address, uint8_t current_speed, uint8_t target_speed){
+  roboclaw.BackwardM1(address, target_speed);
+  roboclaw.BackwardM2(address, target_speed);
 }
 
 void turnForward(uint8_t address, uint8_t speed1, uint8_t speed2) {
