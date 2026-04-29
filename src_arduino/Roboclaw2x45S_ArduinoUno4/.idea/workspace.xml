@@ -86,13 +86,6 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
-  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="5ebf563e-d95a-4318-98fd-5fa6ebc546b0" name="Changes" comment="" />
@@ -103,6 +96,7 @@
       <workItem from="1777237272529" duration="72000" />
       <workItem from="1777323925944" duration="690000" />
       <workItem from="1777344054990" duration="1067000" />
+      <workItem from="1777410069900" duration="6000" />
     </task>
     <servers />
   </component>
