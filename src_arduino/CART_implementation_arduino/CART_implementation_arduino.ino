@@ -2,11 +2,11 @@
 #include "RoboClaw.h"
 
 // FRONT MOTORS PAIR
-SoftwareSerial frontSerial(6, 7); // RX (yellow), TX (orange)
+SoftwareSerial frontSerial(3, 4); // RX (yellow), TX (orange)
 RoboClaw roboclawFront(&frontSerial, 10000);
 
 // BACK MOTORS PAIR
-SoftwareSerial backSerial(8, 9); // RX (yellow), TX (orange)
+SoftwareSerial backSerial(5, 6); // RX (yellow), TX (orange)
 RoboClaw roboclawBack(&backSerial, 10000);
 
 #define RC_ADDRESS 0x80
