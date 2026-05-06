@@ -2,7 +2,7 @@
 #include "RoboClaw.h"
 
 // FRONT MOTORS PAIR
-SoftwareSerial frontSerial(10, 11); // RX (yellow), TX (orange)
+SoftwareSerial frontSerial(6, 7); // RX (yellow), TX (orange)
 RoboClaw roboclawFront(&frontSerial, 10000);
 
 // BACK MOTORS PAIR
