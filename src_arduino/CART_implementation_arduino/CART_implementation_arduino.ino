@@ -1,18 +1,37 @@
 #include <SoftwareSerial.h>
-#include "RoboClaw.h"
+#include <RoboClaw.h>
+#include <RF24.h>
 
-// FRONT MOTORS PAIR
-SoftwareSerial frontSerial(3, 4); // RX (yellow), TX (orange)
+// --- MOTOR CONTROLLER LOGIC SEGMENT ---
+SoftwareSerial frontSerial(3, 4); // FRONT MOTORS PAIR: RX (yellow), TX (orange)
 RoboClaw roboclawFront(&frontSerial, 10000);
 
-// BACK MOTORS PAIR
-SoftwareSerial backSerial(5, 6); // RX (yellow), TX (orange)
+SoftwareSerial backSerial(5, 6);  // BACK MOTORS PAIR: RX (yellow), TX (orange)
 RoboClaw roboclawBack(&backSerial, 10000);
 
 #define RC_ADDRESS 0x80
 #define BAUDRATE 38400
 
+int speed = 30;
+
+// --- RF COMMUNICATIONS LOGIC SEGMENT ---
+RF24 radioLeft(7,8);
+RF24 radioRight(9 ,10);
+
+const byte address1[6] = "00001";
+const byte address2[6] = "00002";
+
+int leftPackets = 0;
+int rightPackets = 0;
+
+unsigned long lastMeasure = 0;
+
+// -------------------------------------------------------------------------------
+//      MAIN FUNCTION SECTION
+// -------------------------------------------------------------------------------
+
 void setup() {
+  // ROBOCLAW SETUP
   Serial.begin(BAUDRATE);  // USB serial for debugging
   frontSerial.begin(BAUDRATE);
   backSerial.begin(BAUDRATE);
@@ -20,7 +39,29 @@ void setup() {
   roboclawBack.begin(BAUDRATE);
   Serial.println("RoboClaw sketch started");
 
-  int speed = 30;
+  // RF LEFT MODULE SETUP
+  radioLeft.begin();
+  radioLeft.setChannel(100);
+  radioLeft.setAutoAck(false);
+  radioLeft.openReadingPipe(1, address1);
+  radioLeft.setPALevel(RF24_PA_LOW);
+  radioLeft.setDataRate(RF24_250KBPS);
+  radioLeft.startListening();
+
+  // RF RIGHT MODULE SETUP
+  radioRight.begin();
+  radioRight.setChannel(110);
+  radioRight.setAutoAck(false);
+  radioRight.openReadingPipe(1, address2);
+  radioRight.setPALevel(RF24_PA_LOW);
+  radioRight.setDataRate(RF24_250KBPS);
+  radioRight.startListening();
+
+  // PRINT OUT DEBUGGING STATEMENTS
+  Serial.print("radioLeft connected (CE=7, CSN=8): ");
+  Serial.println(radioLeft.isChipConnected() ? "YES" : "NO");
+  Serial.print("radioRight connected (CE=4, CSN=5): ");
+  Serial.println(radioRight.isChipConnected() ? "YES" : "NO");
 
   for (int i = 0; i <= speed; i++) {
     moveForward(RC_ADDRESS, i);
@@ -32,17 +73,70 @@ void setup() {
   delay(4000);
   Serial.print("loop completed\n");
 
-  // for (int i = speed; i >= 0; i--) {
-  //   moveForward(RC_ADDRESS, i);
-  //   delay(50);  // controls how fast it slows down
-  // }
+  for (int i = speed; i >= 0; i--) {
+    moveForward(RC_ADDRESS, i);
+    delay(50);  // controls how fast it slows down
+  }
 }
 
 void loop() {
-  Serial.print("running\n");
-  moveForward(RC_ADDRESS, 30);
+  moveForward(RC_ADDRESS, 0);
   delay(2000);
+
+  if(radioLeft.available()){
+    char text[32];
+    radioLeft.read(&text, sizeof(text));
+    leftPackets++;
+  }
+
+  if(radioRight.available()){
+    char text[32];
+    radioRight.read(&text, sizeof(text));
+    rightPackets++;
+  }
+
+  if(millis() - lastMeasure > 1000){
+    int difference = leftPackets - rightPackets;
+    int totalPackets = leftPackets + rightPackets;
+
+    Serial.print("Left:");
+    Serial.print(leftPackets);
+    Serial.print(",");
+    Serial.print("Right:");
+    Serial.println(rightPackets);
+
+    Serial.print("Left packets: ");
+    Serial.println(leftPackets);
+    Serial.print("Right packets: ");
+    Serial.println(rightPackets);
+
+    if(difference >= 1)
+      Serial.println("USER IS LEFT");
+    else if(difference <= -1)
+      Serial.println("USER IS RIGHT");
+    else
+      Serial.println("USER IS CENTER");
+
+    if(totalPackets > 120)
+      Serial.println("VERY CLOSE");
+    else if(totalPackets > 60)
+      Serial.println("MEDIUM");
+    else if(totalPackets > 20)
+      Serial.println("FAR");
+    else
+      Serial.println("VERY FAR");
+
+    Serial.println();
+
+    leftPackets = 0;
+    rightPackets = 0;
+    lastMeasure = millis();
+  }
 }
+
+// -------------------------------------------------------------------------------
+//      DEFINED FUNCTIONS SECTION
+// -------------------------------------------------------------------------------
 
 void moveForward(uint8_t address, uint8_t speed) {
   roboclawFront.ForwardM1(address, speed);
