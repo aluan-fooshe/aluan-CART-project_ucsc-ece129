@@ -80,9 +80,6 @@ void setup() {
 }
 
 void loop() {
-  moveForward(RC_ADDRESS, 0);
-  delay(2000);
-
   if(radioLeft.available()){
     char text[32];
     radioLeft.read(&text, sizeof(text));
@@ -110,21 +107,35 @@ void loop() {
     Serial.print("Right packets: ");
     Serial.println(rightPackets);
 
-    if(difference >= 1)
+    if(difference >= 1){
       Serial.println("USER IS LEFT");
-    else if(difference <= -1)
+      //turnForward(RC_ADDRESS, speed, -speed); // NOT CONFIRMED WHICH DIRECTION FOR REAL
+    }
+    else if(difference <= -1){
       Serial.println("USER IS RIGHT");
+      //turnForward(RC_ADDRESS, -speed, speed); // NOT CONFIRMED WHICH DIRECTION FOR REAL
+    }
     else
       Serial.println("USER IS CENTER");
 
-    if(totalPackets > 120)
+    if(totalPackets > 120){
       Serial.println("VERY CLOSE");
-    else if(totalPackets > 60)
+      //moveBackward(RC_ADDRESS, speed/2);
+    }
+    else if(totalPackets > 60){
       Serial.println("MEDIUM");
-    else if(totalPackets > 20)
+      //moveForward(RC_ADDRESS, 0);
+    }
+    else if(totalPackets > 20){
       Serial.println("FAR");
-    else
+      //moveForward(RC_ADDRESS, speed/2);
+      rampToSpeed(speed / 2);
+    }
+    else{
       Serial.println("VERY FAR");
+      //moveForward(RC_ADDRESS, speed);
+      rampToSpeed(speed);
+    }
 
     Serial.println();
 
@@ -137,6 +148,24 @@ void loop() {
 // -------------------------------------------------------------------------------
 //      DEFINED FUNCTIONS SECTION
 // -------------------------------------------------------------------------------
+
+int currentSpeed = 0;
+int targetSpeed = 0;
+const int RAMP_STEP = 5;      // How much to change per loop iteration
+const int RAMP_DELAY = 20;    // ms between each step
+
+void rampToSpeed(int target) {
+  targetSpeed = target;
+  while (currentSpeed != targetSpeed) {
+    if (currentSpeed < targetSpeed)
+      currentSpeed = min(currentSpeed + RAMP_STEP, targetSpeed);
+    else
+      currentSpeed = max(currentSpeed - RAMP_STEP, targetSpeed);
+    
+    moveForward(RC_ADDRESS, currentSpeed);
+    delay(RAMP_DELAY);
+  }
+}
 
 void moveForward(uint8_t address, uint8_t speed) {
   roboclawFront.ForwardM1(address, speed);
