@@ -15,7 +15,7 @@ RoboClaw roboclawBack(&backSerial, 10000);
 int speed = 30;
 
 // --- RF COMMUNICATIONS LOGIC SEGMENT ---
-RF24 radioLeft(7,8);
+RF24 radioLeft(7, 8);
 RF24 radioRight(9 ,10);
 
 const byte address1[6] = "00001";
@@ -63,20 +63,13 @@ void setup() {
   Serial.print("radioRight connected (CE=4, CSN=5): ");
   Serial.println(radioRight.isChipConnected() ? "YES" : "NO");
 
-  for (int i = 0; i <= speed; i++) {
-    moveForward(RC_ADDRESS, i);
-    delay(50);  // controls how fast it speeds up
-  }
-
   // Move forward
-  moveForward(RC_ADDRESS, speed);
+  moveBackward(RC_ADDRESS, speed);
   delay(4000);
   Serial.print("loop completed\n");
 
-  for (int i = speed; i >= 0; i--) {
-    moveForward(RC_ADDRESS, i);
-    delay(50);  // controls how fast it slows down
-  }
+  moveBackward(RC_ADDRESS, 0);
+
 }
 
 void loop() {
@@ -121,10 +114,12 @@ void loop() {
     if(totalPackets > 120){
       Serial.println("VERY CLOSE");
       //moveBackward(RC_ADDRESS, speed/2);
+      rampToSpeed(0);
     }
     else if(totalPackets > 60){
       Serial.println("MEDIUM");
       //moveForward(RC_ADDRESS, 0);
+      rampToSpeed(0);
     }
     else if(totalPackets > 20){
       Serial.println("FAR");
