@@ -27,6 +27,42 @@ int rightPackets = 0;
 unsigned long lastMeasure = 0;
 
 // -------------------------------------------------------------------------------
+//      DEFINED FUNCTIONS SECTION
+// -------------------------------------------------------------------------------
+
+void moveForward(uint8_t address, uint8_t speed, int delay_time = 0) {
+  roboclawFront.ForwardM1(address, speed);
+  roboclawFront.ForwardM2(address, speed);
+  roboclawBack.BackwardM1(address, speed);
+  roboclawBack.BackwardM2(address, speed);
+  if (delay_time > 0) delay(delay_time);
+}
+
+void moveBackward(uint8_t address, uint8_t speed, int delay_time = 0) {
+  roboclawFront.BackwardM1(address, speed);
+  roboclawFront.BackwardM2(address, speed);
+  roboclawBack.ForwardM1(address, speed);
+  roboclawBack.ForwardM2(address, speed);
+  if (delay_time > 0) delay(delay_time);
+}
+
+void turn1(uint8_t address, uint8_t speed, int delay_time = 0){
+  roboclawFront.ForwardM1(address, speed);
+  roboclawFront.BackwardM2(address, speed);
+  roboclawBack.BackwardM1(address, speed);
+  roboclawBack.ForwardM2(address, speed);
+  if (delay_time > 0) delay(delay_time);
+}
+
+void turn2(uint8_t address, uint8_t speed, int delay_time = 0){
+  roboclawFront.BackwardM1(address, speed);
+  roboclawFront.ForwardM2(address, speed);  // was BackwardM2
+  roboclawBack.ForwardM1(address, speed);
+  roboclawBack.BackwardM2(address, speed);
+  if (delay_time > 0) delay(delay_time);
+}
+
+// -------------------------------------------------------------------------------
 //      MAIN FUNCTION SECTION
 // -------------------------------------------------------------------------------
 
@@ -66,49 +102,24 @@ void setup() {
   // PRINT OUT DEBUGGING STATEMENTS
   Serial.print("radioLeft connected (CE=7, CSN=8): ");
   Serial.println(radioLeft.isChipConnected() ? "YES" : "NO");
-  Serial.print("radioRight connected (CE=4, CSN=5): ");
+  Serial.print("radioRight connected (CE=9, CSN=10): ");
   Serial.println(radioRight.isChipConnected() ? "YES" : "NO");
 
-  // function testing
-  for (int i=0; i<=given_speed; i++){
-    moveForward(RC_ADDRESS, i);
-    delay(100);
-  }
+  //   // function testing
+  // for (int i=0; i<=given_speed; i++){
+  //   turn1(RC_ADDRESS, i);
+  //   delay(100);
+  // }
 
-  delay(2000);
-  moveForward(RC_ADDRESS, 0);
-  
-  // Move backward
-  roboclawFront.ForwardM1(RC_ADDRESS, 30);
-  roboclawFront.ForwardM2(RC_ADDRESS, 30);
-  delay(3000);
+  // rotate clockwise
+  turn1(RC_ADDRESS, 30, 1200);
+  turn1(RC_ADDRESS, 0, 400);
 
-  // Move forward
-  moveForward(RC_ADDRESS, 30);
-  delay(2000);
-
-  moveForward(RC_ADDRESS, 0);
-  delay(2000);
+  // rotate counterclockwise
+  turn2(RC_ADDRESS, 30, 1200);
+  turn2(RC_ADDRESS, 0, 400);
 }
 
 void loop() {
 
-}
-
-// -------------------------------------------------------------------------------
-//      DEFINED FUNCTIONS SECTION
-// -------------------------------------------------------------------------------
-
-void moveForward(uint8_t address, uint8_t speed) {
-  roboclawFront.ForwardM1(address, speed);
-  roboclawFront.ForwardM2(address, speed);
-  roboclawBack.BackwardM1(address, speed);
-  roboclawBack.BackwardM2(address, speed);
-}
-
-void moveBackward(uint8_t address, uint8_t speed) {
-  roboclawFront.BackwardM1(address, speed);
-  roboclawFront.BackwardM1(address, speed);
-  roboclawBack.ForwardM1(address, speed);
-  roboclawBack.ForwardM2(address, speed);
 }
