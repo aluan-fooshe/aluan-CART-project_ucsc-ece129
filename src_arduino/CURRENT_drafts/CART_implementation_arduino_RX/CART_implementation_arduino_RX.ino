@@ -12,7 +12,7 @@ RoboClaw roboclawBack(&backSerial, 100);
 #define RC_ADDRESS 0x80
 #define BAUDRATE 38400
 
-int given_speed = 30;
+int given_speed = 10;
 
 // --- RF COMMUNICATIONS LOGIC SEGMENT ---
 RF24 radioLeft(7, 8); // RF24(ce_pin, csn_pin)
@@ -67,59 +67,49 @@ void turn2(uint8_t address, uint8_t speed, int delay_time = 0){
 // -------------------------------------------------------------------------------
 
 void setup() {
-  // ROBOCLAW SETUP
-  Serial.begin(BAUDRATE);  // USB serial for debugging
-  frontSerial.begin(BAUDRATE);
-  backSerial.begin(BAUDRATE);
-  roboclawFront.begin(BAUDRATE);
-  roboclawBack.begin(BAUDRATE);
-  Serial.println("RoboClaw sketch started");
-
-  delay(2000);  // Wait for RoboClaw to fully boot before sending any commands
-
-  // RF LEFT MODULE SETUP
+  Serial.begin(BAUDRATE);
   radioLeft.begin();
-  radioLeft.setChannel(100);
-  radioLeft.setAutoAck(false);
-  radioLeft.openReadingPipe(1, address1);
-  radioLeft.setPALevel(RF24_PA_LOW);
-  radioLeft.setDataRate(RF24_250KBPS);
-  radioLeft.startListening();
-
-  // RF RIGHT MODULE SETUP
   radioRight.begin();
-  radioRight.setChannel(110);
-  radioRight.setAutoAck(false);
-  radioRight.openReadingPipe(1, address2);
-  radioRight.setPALevel(RF24_PA_LOW);
-  radioRight.setDataRate(RF24_250KBPS);
-  radioRight.startListening();
-
-  // Stop RF24 before motor commands to prevent SPI interference
   radioLeft.stopListening();
   radioRight.stopListening();
-
-  // PRINT OUT DEBUGGING STATEMENTS
-  Serial.print("radioLeft connected (CE=7, CSN=8): ");
-  Serial.println(radioLeft.isChipConnected() ? "YES" : "NO");
-  Serial.print("radioRight connected (CE=9, CSN=10): ");
-  Serial.println(radioRight.isChipConnected() ? "YES" : "NO");
-
-  //   // function testing
-  // for (int i=0; i<=given_speed; i++){
-  //   turn1(RC_ADDRESS, i);
-  //   delay(100);
-  // }
-
-  // rotate clockwise
-  turn1(RC_ADDRESS, 30, 1200);
-  turn1(RC_ADDRESS, 0, 400);
-
-  // rotate counterclockwise
-  turn2(RC_ADDRESS, 30, 1200);
-  turn2(RC_ADDRESS, 0, 400);
+  frontSerial.begin(BAUDRATE);
+  roboclawFront.begin(BAUDRATE);
+  backSerial.begin(BAUDRATE);
+  roboclawBack.begin(BAUDRATE);
+  Serial.println("Ready. Format: 1 1200 or 2 1200");
 }
 
 void loop() {
+  if (Serial.available()) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
 
+    int spaceIndex = input.indexOf(' ');
+    if (spaceIndex != -1) {
+      int turnDir = input.substring(0, spaceIndex).toInt();
+      int delay_ms = input.substring(spaceIndex + 1).toInt();
+
+      Serial.print("Running turn");
+      Serial.print(turnDir);
+      Serial.print(" for ");
+      Serial.print(delay_ms);
+      Serial.println("ms...");
+
+      if (turnDir == 1) {
+        turn1(RC_ADDRESS, given_speed, delay_ms);
+        turn1(RC_ADDRESS, 0, 400);
+      } else if (turnDir == 2) {
+        turn2(RC_ADDRESS, given_speed, delay_ms);
+        turn2(RC_ADDRESS, 0, 400);
+      }
+      else if (turnDir == 0) {
+        turn2(RC_ADDRESS, 0, delay_ms);
+        turn2(RC_ADDRESS, 0, 400);
+      }
+
+      Serial.println("Done. Send next value.");
+    } else {
+      Serial.println("Bad format. Use: 1 1200");
+    }
+  }
 }
