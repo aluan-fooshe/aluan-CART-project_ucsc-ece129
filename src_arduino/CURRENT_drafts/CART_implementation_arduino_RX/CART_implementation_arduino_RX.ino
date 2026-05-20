@@ -11,6 +11,7 @@ RoboClaw roboclawBack(&backSerial, 100);
 
 #define RC_ADDRESS 0x80
 #define BAUDRATE 38400
+//38400
 
 int given_speed = 10;
 
@@ -33,32 +34,40 @@ unsigned long lastMeasure = 0;
 void moveForward(uint8_t address, uint8_t speed, int delay_time = 0) {
   roboclawFront.ForwardM1(address, speed);
   roboclawFront.ForwardM2(address, speed);
-  roboclawBack.BackwardM1(address, speed);
-  roboclawBack.BackwardM2(address, speed);
+  roboclawBack.ForwardM1(address, speed);
+  roboclawBack.ForwardM2(address, speed);
+  // roboclawBack.BackwardM1(address, speed);
+  // roboclawBack.BackwardM2(address, speed);
   if (delay_time > 0) delay(delay_time);
 }
 
 void moveBackward(uint8_t address, uint8_t speed, int delay_time = 0) {
   roboclawFront.BackwardM1(address, speed);
   roboclawFront.BackwardM2(address, speed);
-  roboclawBack.ForwardM1(address, speed);
-  roboclawBack.ForwardM2(address, speed);
+  roboclawBack.BackwardM1(address, speed);
+  roboclawBack.BackwardM2(address, speed);
+  // roboclawBack.ForwardM1(address, speed);
+  // roboclawBack.ForwardM2(address, speed);
   if (delay_time > 0) delay(delay_time);
 }
 
 void turn1(uint8_t address, uint8_t speed, int delay_time = 0){
   roboclawFront.ForwardM1(address, speed);
   roboclawFront.BackwardM2(address, speed);
-  roboclawBack.BackwardM1(address, speed);
-  roboclawBack.ForwardM2(address, speed);
+  roboclawBack.ForwardM1(address, speed);
+  roboclawBack.BackwardM2(address, speed);
+  // roboclawBack.BackwardM1(address, speed);
+  // roboclawBack.ForwardM2(address, speed);
   if (delay_time > 0) delay(delay_time);
 }
 
 void turn2(uint8_t address, uint8_t speed, int delay_time = 0){
   roboclawFront.BackwardM1(address, speed);
-  roboclawFront.ForwardM2(address, speed);  // was BackwardM2
-  roboclawBack.ForwardM1(address, speed);
-  roboclawBack.BackwardM2(address, speed);
+  roboclawFront.ForwardM2(address, speed);
+  roboclawBack.BackwardM1(address, speed);
+  roboclawBack.ForwardM2(address, speed);
+  // roboclawBack.ForwardM1(address, speed);
+  // roboclawBack.BackwardM2(address, speed);
   if (delay_time > 0) delay(delay_time);
 }
 
@@ -67,7 +76,7 @@ void turn2(uint8_t address, uint8_t speed, int delay_time = 0){
 // -------------------------------------------------------------------------------
 
 void setup() {
-  Serial.begin(BAUDRATE);
+  Serial.begin(57600);
   radioLeft.begin();
   radioRight.begin();
   radioLeft.stopListening();
@@ -76,40 +85,13 @@ void setup() {
   roboclawFront.begin(BAUDRATE);
   backSerial.begin(BAUDRATE);
   roboclawBack.begin(BAUDRATE);
-  Serial.println("Ready. Format: 1 1200 or 2 1200");
+  Serial.println("Ready for testing (with weight)");
+
+  delay(2000);
+  moveForward(RC_ADDRESS, 25, 8500);
 }
 
 void loop() {
-  if (Serial.available()) {
-    String input = Serial.readStringUntil('\n');
-    input.trim();
-
-    int spaceIndex = input.indexOf(' ');
-    if (spaceIndex != -1) {
-      int turnDir = input.substring(0, spaceIndex).toInt();
-      int delay_ms = input.substring(spaceIndex + 1).toInt();
-
-      Serial.print("Running turn");
-      Serial.print(turnDir);
-      Serial.print(" for ");
-      Serial.print(delay_ms);
-      Serial.println("ms...");
-
-      if (turnDir == 1) {
-        turn1(RC_ADDRESS, given_speed, delay_ms);
-        turn1(RC_ADDRESS, 0, 400);
-      } else if (turnDir == 2) {
-        turn2(RC_ADDRESS, given_speed, delay_ms);
-        turn2(RC_ADDRESS, 0, 400);
-      }
-      else if (turnDir == 0) {
-        turn2(RC_ADDRESS, 0, delay_ms);
-        turn2(RC_ADDRESS, 0, 400);
-      }
-
-      Serial.println("Done. Send next value.");
-    } else {
-      Serial.println("Bad format. Use: 1 1200");
-    }
-  }
+  moveForward(RC_ADDRESS, 0, 2000);
+  Serial.println("loop running");
 }
