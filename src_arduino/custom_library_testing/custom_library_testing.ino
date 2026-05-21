@@ -1,81 +1,238 @@
-//Includes required to use Roboclaw library
+#include <SPI.h>
 #include <SoftwareSerial.h>
-#include "RoboClaw.h"
+#include <RoboClaw.h>
+#include <RF24.h>
+#include <nRF24L01.h>
 
-//Uncomment if Using Hardware Serial port
-//RoboClaw roboclaw(&Serial,10000);
+// -------------------------------------------------------------------------------
+//      MOTOR CONTROLLER SETUP
+// -------------------------------------------------------------------------------
 
-//Uncomment if using SoftwareSerial. See limitations of Arduino SoftwareSerial
-// SoftwareSerial serial(10,11);	
-SoftwareSerial serial(3,4);	// FRONT MOTORS PAIR: RX (yellow), TX (orange)
-RoboClaw roboclaw(&serial,10000);
+SoftwareSerial frontSerial(3, 4);  // FRONT MOTORS PAIR: RX (yellow), TX (orange)
+RoboClaw roboclawFront(&frontSerial, 100);
 
-#define FR_ADDRESS 0x80
-#define BK_ADDRESS 0x80
+SoftwareSerial backSerial(5, 6);   // BACK MOTORS PAIR: RX (yellow), TX (orange)
+RoboClaw roboclawBack(&backSerial, 100);
+
+#define RC_ADDRESS 0x80
 #define BAUDRATE 38400
 
-//Velocity PID coefficients
-#define Kp 1.0
-#define Ki 0.5
-#define Kd 0.25
-#define QPPS 100
+// -------------------------------------------------------------------------------
+//      RF RECEIVER SETUP
+// -------------------------------------------------------------------------------
 
-void displayspeed(){
-  int motor_1_count = roboclaw.ReadEncM1(0x80);
-  int motor_2_count = roboclaw.ReadEncM2(0x80);
-  int motor_1_speed = roboclaw.ReadSpeedM1(0x80);
-  int motor_2_speed = roboclaw.ReadSpeedM2(0x80);
-  Serial.print("EncM1, SpeedM1: "); 
-  Serial.print(motor_1_count); 
-  Serial.print(", "); 
-  Serial.print(motor_1_speed);
-  Serial.print("\t\t");
-  Serial.print("EncM2, SpeedM2: "); 
-  Serial.print(motor_2_count); 
-  Serial.print(", "); 
-  Serial.print(motor_2_speed);
-  Serial.println("");
+RF24 radioLeft(7, 8);   // CE=7, CSN=8
+RF24 radioRight(9, 10); // CE=9, CSN=10
+
+const byte address1[6] = "00001";
+const byte address2[6] = "00002";
+
+int leftPackets  = 0;
+int rightPackets = 0;
+
+unsigned long lastMeasure = 0;
+const unsigned long MEASURE_INTERVAL = 1000; // ms
+
+// -------------------------------------------------------------------------------
+//      SPEED CONFIGURATION
+// -------------------------------------------------------------------------------
+
+// Distance thresholds (total packets per second)
+// Tune these to match your real-world environment
+const int VERY_CLOSE_THRESH  = 120;
+const int MEDIUM_THRESH      = 60;
+const int FAR_THRESH         = 20;
+const int VERY_FAR_THRESH    = 10;
+
+// Speeds for each distance band (closer = slower)
+const uint8_t SPEED_VERY_CLOSE = 5;   // nearly stopped — collision avoidance
+const uint8_t SPEED_MEDIUM     = 20;
+const uint8_t SPEED_FAR        = 50;  // fastest — chase the user
+const uint8_t SPEED_VERY_FAR   = 0;  
+
+// Turning speed when user is clearly off-center
+const uint8_t SPEED_TURN = 30;
+
+// How many more packets on one side before we consider the user off-center
+// (raise this to make the centering zone wider)
+const int CENTER_DEADBAND = 10;
+
+// -------------------------------------------------------------------------------
+//      MOTOR PRIMITIVES
+// -------------------------------------------------------------------------------
+
+void stopAll() {
+  roboclawFront.ForwardM1(RC_ADDRESS, 0);
+  roboclawFront.ForwardM2(RC_ADDRESS, 0);
+  roboclawBack.ForwardM1(RC_ADDRESS, 0);
+  roboclawBack.ForwardM2(RC_ADDRESS, 0);
 }
 
-void moveForward(uint8_t rc_address, uint8_t speed){
-  roboclaw.ForwardM1(rc_address, speed);
-  roboclaw.ForwardM2(rc_address, speed);
+void moveForward(uint8_t speed) {
+  roboclawFront.ForwardM1(RC_ADDRESS, speed);
+  roboclawFront.ForwardM2(RC_ADDRESS, speed);
+  roboclawBack.BackwardM1(RC_ADDRESS, speed);
+  roboclawBack.BackwardM2(RC_ADDRESS, speed);
 }
 
-// ----------------- MAIN FUNCTION BLOCK -----------------
+void moveBackward(uint8_t speed) {
+  roboclawFront.BackwardM1(RC_ADDRESS, speed);
+  roboclawFront.BackwardM2(RC_ADDRESS, speed);
+  roboclawBack.ForwardM1(RC_ADDRESS, speed);
+  roboclawBack.ForwardM2(RC_ADDRESS, speed);
+}
+
+// Turn LEFT in place (user is to the left)
+void turnLeft(uint8_t speed) {
+  roboclawFront.BackwardM1(RC_ADDRESS, speed);
+  roboclawFront.ForwardM2(RC_ADDRESS, speed);
+  roboclawBack.ForwardM1(RC_ADDRESS, speed);
+  roboclawBack.BackwardM2(RC_ADDRESS, speed);
+}
+
+// Turn RIGHT in place (user is to the right)
+void turnRight(uint8_t speed) {
+  roboclawFront.ForwardM1(RC_ADDRESS, speed);
+  roboclawFront.BackwardM2(RC_ADDRESS, speed);
+  roboclawBack.BackwardM1(RC_ADDRESS, speed);
+  roboclawBack.ForwardM2(RC_ADDRESS, speed);
+}
+
+// -------------------------------------------------------------------------------
+//      SPEED FROM DISTANCE HELPER
+// -------------------------------------------------------------------------------
+
+uint8_t speedFromTotalPackets(int total) {
+if (total < VERY_CLOSE_THRESH)                            return SPEED_VERY_CLOSE;
+if (total > VERY_CLOSE_THRESH && total < FAR_THRESH)      return SPEED_MEDIUM;
+  if (total > FAR_THRESH && total < VERY_FAR_THRESH)      return SPEED_FAR;
+else                                                      return SPEED_VERY_FAR;
+}
+
+// -------------------------------------------------------------------------------
+//      SETUP
+// -------------------------------------------------------------------------------
 
 void setup() {
-  //Communicate at 38400bps
-  Serial.begin(57600);
-  
-  // Must explicitly start the SoftwareSerial port
-  roboclaw.begin(BAUDRATE);
+  Serial.begin(9600);
 
-  //Set PID Coefficients
-  roboclaw.SetM1VelocityPID(FR_ADDRESS, Kd, Kp, Ki, QPPS);
-  roboclaw.SetM2VelocityPID(FR_ADDRESS, Kd, Kp, Ki, QPPS); 
+  // Radio — LEFT
+  radioLeft.begin();
+  radioLeft.setChannel(100);
+  radioLeft.setAutoAck(false);
+  radioLeft.openReadingPipe(1, address1);
+  radioLeft.setPALevel(RF24_PA_LOW);
+  radioLeft.setDataRate(RF24_250KBPS);
+  radioLeft.startListening();
 
-  delay(2000); // time needed to boot up the roboclaws
+  // Radio — RIGHT
+  radioRight.begin();
+  radioRight.setChannel(110);
+  radioRight.setAutoAck(false);
+  radioRight.openReadingPipe(1, address2);
+  radioRight.setPALevel(RF24_PA_LOW);
+  radioRight.setDataRate(RF24_250KBPS);
+  radioRight.startListening();
 
-  // SpeedAccelMx(address, accel, speed) — accel and speed are separate args
-  // Forward
-  roboclaw.SpeedAccelM1(FR_ADDRESS, 500, 1000);
-  roboclaw.SpeedAccelM2(FR_ADDRESS, 500, 1000);
+  Serial.print("radioLeft  connected (CE=7, CSN=8):  ");
+  Serial.println(radioLeft.isChipConnected()  ? "YES" : "NO");
+  Serial.print("radioRight connected (CE=9, CSN=10): ");
+  Serial.println(radioRight.isChipConnected() ? "YES" : "NO");
 
-  moveForward(FR_ADDRESS, 20);
-  displayspeed();
-  delay(7500);
+  // Motor controllers
+  frontSerial.begin(BAUDRATE);
+  roboclawFront.begin(BAUDRATE);
+  backSerial.begin(BAUDRATE);
+  roboclawBack.begin(BAUDRATE);
+
+  stopAll();
+  Serial.println("System ready.");
 }
 
-void loop()
-{  
-  roboclaw.ForwardM1(FR_ADDRESS, 0); // explicit stop
-  roboclaw.ForwardM2(FR_ADDRESS, 0);
-  delay(1000);
+// -------------------------------------------------------------------------------
+//      MAIN LOOP
+// -------------------------------------------------------------------------------
 
-  // // Backward (negative speed)
-  // roboclaw.SpeedAccelM1(FR_ADDRESS, 500, -1000);
-  // roboclaw.SpeedAccelM2(FR_ADDRESS, 500, -1000);
-  // delay(500);
+void loop() {
+  // --- Continuously drain radio buffers and count packets ---
+  if (radioLeft.available()) {
+    char text[32];
+    radioLeft.read(&text, sizeof(text));
+    leftPackets++;
+  }
 
+  if (radioRight.available()) {
+    char text[32];
+    radioRight.read(&text, sizeof(text));
+    rightPackets++;
+  }
+
+  // --- Every MEASURE_INTERVAL ms, decide what to do ---
+  if (millis() - lastMeasure >= MEASURE_INTERVAL) {
+
+    int difference   = leftPackets - rightPackets; // + = user left, - = user right
+    int totalPackets = leftPackets + rightPackets;
+    uint8_t driveSpeed = speedFromTotalPackets(totalPackets);
+
+    // --- Serial debug ---
+    Serial.print("Left:");
+    Serial.print(leftPackets);
+    Serial.print("  Right:");
+    Serial.print(rightPackets);
+    Serial.print("  Diff:");
+    Serial.print(difference);
+    Serial.print("  Total:");
+    Serial.println(totalPackets);
+
+    // --- Position label ---
+    String position;
+    if      (difference >  CENTER_DEADBAND) position = "LEFT";
+    else if (difference < -CENTER_DEADBAND) position = "RIGHT";
+    else                                    position = "CENTER";
+
+    // --- Distance label ---
+    String distance;
+    if      (totalPackets < VERY_CLOSE_THRESH) distance = "VERY CLOSE";
+    else if (totalPackets > VERY_CLOSE_THRESH && totalPackets < MEDIUM_THRESH)     distance = "MEDIUM";
+    else if (totalPackets > MEDIUM_THRESH && totalPackets < FAR_THRESH)        distance = "FAR";
+    else                                       distance = "VERY FAR";
+
+    Serial.print("Position: ");
+    Serial.print(position);
+    Serial.print("  Distance: ");
+    Serial.print(distance);
+    Serial.print("  DriveSpeed: ");
+    Serial.println(driveSpeed);
+
+    // --- Motor decision ---
+    if (position == "LEFT") {
+      // User is to the left — turn left to face them
+      turnLeft(SPEED_TURN);
+      Serial.println("Action: TURN LEFT");
+
+    } else if (position == "RIGHT") {
+      // User is to the right — turn right to face them
+      turnRight(SPEED_TURN);
+      Serial.println("Action: TURN RIGHT");
+
+    } else {
+      // User is centered
+      if (totalPackets == 0) {
+        // No signal at all — stop and wait
+        stopAll();
+        Serial.println("Action: STOP (no signal)");
+      } else {
+        // Move forward, speed inversely scaled with proximity
+        moveForward(driveSpeed);
+        Serial.println("Action: FORWARD");
+      }
+    }
+
+    Serial.println();
+
+    // Reset counters
+    leftPackets  = 0;
+    rightPackets = 0;
+    lastMeasure  = millis();
+  }
 }
