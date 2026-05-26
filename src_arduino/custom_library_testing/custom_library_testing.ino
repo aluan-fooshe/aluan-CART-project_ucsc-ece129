@@ -45,8 +45,8 @@ const int FAR_THRESH         = 20;
 const int VERY_FAR_THRESH    = 10;
 
 // Speeds for each distance band (closer = slower)
-const uint8_t SPEED_VERY_CLOSE = 5;   // nearly stopped — collision avoidance
-const uint8_t SPEED_MEDIUM     = 20;
+const uint8_t SPEED_VERY_CLOSE = 15;   // nearly stopped — collision avoidance
+const uint8_t SPEED_MEDIUM     = 30;
 const uint8_t SPEED_FAR        = 50;  // fastest — chase the user
 const uint8_t SPEED_VERY_FAR   = 0;  
 
@@ -61,6 +61,34 @@ const int CENTER_DEADBAND = 10;
 //      MOTOR PRIMITIVES
 // -------------------------------------------------------------------------------
 
+void moveForward(uint8_t speed) {
+  roboclawFront.ForwardM1(RC_ADDRESS, speed);
+  roboclawFront.ForwardM2(RC_ADDRESS, speed);
+  roboclawFront.ForwardM1(RC_ADDRESS, speed);
+  roboclawFront.ForwardM2(RC_ADDRESS, speed);
+}
+
+void moveBackward(uint8_t speed) {
+  roboclawBack.BackwardM1(RC_ADDRESS, speed);
+  roboclawBack.BackwardM2(RC_ADDRESS, speed);
+  roboclawBack.BackwardM1(RC_ADDRESS, speed);
+  roboclawBack.BackwardM2(RC_ADDRESS, speed);
+}
+
+void turnRight(uint8_t speed) {
+  roboclawFront.ForwardM1(RC_ADDRESS, speed);
+  roboclawFront.BackwardM2(RC_ADDRESS, speed);
+  roboclawBack.ForwardM1(RC_ADDRESS, speed);
+  roboclawBack.BackwardM2(RC_ADDRESS, speed);
+}
+
+void turnLeft(uint8_t speed) {
+  roboclawFront.BackwardM1(RC_ADDRESS, speed);
+  roboclawFront.ForwardM2(RC_ADDRESS, speed);
+  roboclawBack.BackwardM1(RC_ADDRESS, speed);
+  roboclawBack.ForwardM2(RC_ADDRESS, speed);
+}
+
 void stopAll() {
   roboclawFront.ForwardM1(RC_ADDRESS, 0);
   roboclawFront.ForwardM2(RC_ADDRESS, 0);
@@ -68,45 +96,16 @@ void stopAll() {
   roboclawBack.ForwardM2(RC_ADDRESS, 0);
 }
 
-void moveForward(uint8_t speed) {
-  roboclawFront.ForwardM1(RC_ADDRESS, speed);
-  roboclawFront.ForwardM2(RC_ADDRESS, speed);
-  roboclawBack.BackwardM1(RC_ADDRESS, speed);
-  roboclawBack.BackwardM2(RC_ADDRESS, speed);
-}
-
-void moveBackward(uint8_t speed) {
-  roboclawFront.BackwardM1(RC_ADDRESS, speed);
-  roboclawFront.BackwardM2(RC_ADDRESS, speed);
-  roboclawBack.ForwardM1(RC_ADDRESS, speed);
-  roboclawBack.ForwardM2(RC_ADDRESS, speed);
-}
-
-// Turn LEFT in place (user is to the left)
-void turnLeft(uint8_t speed) {
-  roboclawFront.BackwardM1(RC_ADDRESS, speed);
-  roboclawFront.ForwardM2(RC_ADDRESS, speed);
-  roboclawBack.ForwardM1(RC_ADDRESS, speed);
-  roboclawBack.BackwardM2(RC_ADDRESS, speed);
-}
-
-// Turn RIGHT in place (user is to the right)
-void turnRight(uint8_t speed) {
-  roboclawFront.ForwardM1(RC_ADDRESS, speed);
-  roboclawFront.BackwardM2(RC_ADDRESS, speed);
-  roboclawBack.BackwardM1(RC_ADDRESS, speed);
-  roboclawBack.ForwardM2(RC_ADDRESS, speed);
-}
-
 // -------------------------------------------------------------------------------
 //      SPEED FROM DISTANCE HELPER
 // -------------------------------------------------------------------------------
 
 uint8_t speedFromTotalPackets(int total) {
-if (total < VERY_CLOSE_THRESH)                            return SPEED_VERY_CLOSE;
-if (total > VERY_CLOSE_THRESH && total < FAR_THRESH)      return SPEED_MEDIUM;
-  if (total > FAR_THRESH && total < VERY_FAR_THRESH)      return SPEED_FAR;
-else                                                      return SPEED_VERY_FAR;
+  if (total >= VERY_CLOSE_THRESH) return SPEED_VERY_CLOSE;  // >120 → very close, slow
+  if (total >= MEDIUM_THRESH)     return SPEED_MEDIUM;       // >60
+  if (total >= FAR_THRESH)        return SPEED_FAR;          // >20  → far, fast
+  if (total >= VERY_FAR_THRESH)   return SPEED_VERY_FAR;     // >10
+  return 0;                                                   // no signal
 }
 
 // -------------------------------------------------------------------------------
@@ -192,10 +191,11 @@ void loop() {
 
     // --- Distance label ---
     String distance;
-    if      (totalPackets < VERY_CLOSE_THRESH) distance = "VERY CLOSE";
-    else if (totalPackets > VERY_CLOSE_THRESH && totalPackets < MEDIUM_THRESH)     distance = "MEDIUM";
-    else if (totalPackets > MEDIUM_THRESH && totalPackets < FAR_THRESH)        distance = "FAR";
-    else                                       distance = "VERY FAR";
+    if      (totalPackets >= VERY_CLOSE_THRESH)  distance = "VERY CLOSE";
+    else if (totalPackets >= MEDIUM_THRESH)      distance = "MEDIUM";
+    else if (totalPackets >= FAR_THRESH)         distance = "FAR";
+    else if (totalPackets >= VERY_FAR_THRESH)    distance = "VERY FAR";
+    else                                         distance = "NO SIGNAL";
 
     Serial.print("Position: ");
     Serial.print(position);
