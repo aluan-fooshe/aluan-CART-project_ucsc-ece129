@@ -47,6 +47,8 @@ void loop() {
   radio.write(&text, sizeof(text));
   packetsSent++;
 
+  // delay(10);
+
   radio.setChannel(110);
   radio.openWritingPipe(address2);
   radio.write(&text, sizeof(text));
