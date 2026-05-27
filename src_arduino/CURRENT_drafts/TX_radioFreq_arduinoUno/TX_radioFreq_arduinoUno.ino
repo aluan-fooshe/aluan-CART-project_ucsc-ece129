@@ -1,63 +1,40 @@
 #include <SPI.h>
-#include <nRF24L01.h>
 #include <RF24.h>
+#include <nRF24L01.h>
 
 RF24 radio(7, 8);
-
-const byte address1[6] = "00001";
-const byte address2[6] = "00002";
+const byte address[6] = "00001";
 
 void setup() {
   Serial.begin(9600);
-
-  if (!radio.begin()) {
-    Serial.println("Radio hardware not responding!");
-    while (1) {}
-  }
-
+  radio.begin();
+  radio.setChannel(100);
+  radio.enableCRC();               // ← add
+  radio.setCRCLength(RF24_CRC_16); // ← add
+  radio.setAutoAck(true);          // ← change from false
   radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_250KBPS);
-  radio.setAutoAck(false);   // CRITICAL — no ACK expected
-  radio.setRetries(0, 0);    // CRITICAL — don't retry
+  radio.openWritingPipe(address);
   radio.stopListening();
-
-  Serial.println("Transmitter ready");
+  Serial.println("Transmitter ready.");
 }
 
-// void loop() {
-//   const char text[] = "USER";
-
-//   radio.setChannel(100);
-//   radio.openWritingPipe(address1);
-//   radio.write(&text, sizeof(text));
-
-//   radio.setChannel(110);
-//   radio.openWritingPipe(address2);
-//   radio.write(&text, sizeof(text));
-// }
-
-int packetsSent = 0;
-unsigned long lastMeasure = 0;
+unsigned long lastReport = 0;
+int packetsSent   = 0;
+int packetsFailed = 0;
 
 void loop() {
-  const char text[] = "USER";
+  char payload[32] = "PING";
+  bool ok = radio.write(&payload, sizeof(payload));
+  if (ok) packetsSent++;
+  else    packetsFailed++;
 
-  radio.setChannel(100);
-  radio.openWritingPipe(address1);
-  radio.write(&text, sizeof(text));
-  packetsSent++;
-
-  // delay(10);
-
-  radio.setChannel(110);
-  radio.openWritingPipe(address2);
-  radio.write(&text, sizeof(text));
-  packetsSent++;
-
-  if (millis() - lastMeasure > 1000) {
-    Serial.print("Packets sent: ");
-    Serial.println(packetsSent);
-    packetsSent = 0;
-    lastMeasure = millis();
+  if (millis() - lastReport >= 1000) {
+    Serial.print("Sent: ");    Serial.print(packetsSent);
+    Serial.print("  Failed: "); Serial.println(packetsFailed);
+    packetsSent   = 0;
+    packetsFailed = 0;
+    lastReport    = millis();
   }
+  delay(20);
 }

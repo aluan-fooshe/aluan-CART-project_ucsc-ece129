@@ -23,7 +23,7 @@ int given_time = 23000;
 
 // --- RF COMMUNICATIONS LOGIC SEGMENT ---
 RF24 radioLeft(7, 8); // RF24(ce_pin, csn_pin)
-RF24 radioRight(9, 10);
+RF24 radioRight(9, 2);
 
 const byte address1[6] = "00001";
 const byte address2[6] = "00002";
@@ -112,7 +112,7 @@ void stopAll() {
 // -------------------------------------------------------------------------------
 
 void setup() {
-  Serial.begin(57600);
+  Serial.begin(9600);
   radioLeft.begin();
   radioRight.begin();
   radioLeft.stopListening();
