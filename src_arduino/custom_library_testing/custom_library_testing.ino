@@ -36,7 +36,7 @@ void loop() {
   Serial.print("Sent to LEFT  (ch100): ");
   Serial.println(ok1 ? "OK" : "FAIL");
 
-  delay(10); // Short gap before switching
+  delay(2); // Short gap before switching
 
   // --- Broadcast to radioRight (channel 110, address 00002) ---
   radio.setChannel(110);
@@ -45,5 +45,5 @@ void loop() {
   Serial.print("Sent to RIGHT (ch100): ");
   Serial.println(ok2 ? "OK" : "FAIL");
 
-  delay(10); // ~50 packets/sec to each receiver
+  delay(2); // ~50 packets/sec to each receiver
 }

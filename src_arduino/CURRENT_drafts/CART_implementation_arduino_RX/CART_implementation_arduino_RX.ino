@@ -6,8 +6,10 @@
 //      RF RECEIVER SETUP
 // -------------------------------------------------------------------------------
 
-RF24 radioLeft(8, 7);   // CE=8, CSN=7
-RF24 radioRight(9, 2); // CE=9, CSN=2
+// RF24 radioLeft(8, 7);   // CE=8, CSN=7
+// RF24 radioRight(9, 2); // CE=9, CSN=2
+RF24 radioLeft(9, 2);
+RF24 radioRight(8, 7);
 
 const byte address1[6] = "00001";
 const byte address2[6] = "00002";
@@ -29,6 +31,11 @@ int rightTotal = 0;
 
 void setup() {
   Serial.begin(9600);
+
+  pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);   // CE low before init
+  pinMode(7, OUTPUT);
+  digitalWrite(7, HIGH);  // CSN high before init
 
   // Radio — LEFT
   radioLeft.begin();
@@ -62,7 +69,7 @@ void setup() {
 
 void loop() {
   // Drain entire LEFT buffer
-  if (radioLeft.available()) {
+  while (radioLeft.available()) {
     char text[32];
     radioLeft.read(&text, sizeof(text));
     leftPackets++;
@@ -71,7 +78,7 @@ void loop() {
   delayMicroseconds(100); // SPI bus settle before switching radios
 
   // Drain entire RIGHT buffer
-  if (radioRight.available()) {
+  while (radioRight.available()) {
     char text[32];
     radioRight.read(&text, sizeof(text));
     rightPackets++;
@@ -92,6 +99,26 @@ void loop() {
     if (counter >= printEveryInstanceOf) {
       int difference   = leftTotal - rightTotal;
       int totalPackets = leftTotal + rightTotal;
+
+      bool rpd_L = radioLeft.testRPD();
+      bool rpd_R = radioRight.testRPD();
+
+      bool tc_L = radioLeft.testCarrier();
+      bool tc_R = radioRight.testCarrier();
+
+      uint8_t arc_L = radioLeft.getARC();
+      uint8_t arc_R = radioRight.getARC();
+
+      Serial.println("=== Radio Diagnostics ===");
+
+      Serial.print("RPD     — Left: "); Serial.print(rpd_L ? "SIGNAL" : "none");
+      Serial.print("  |  Right: ");     Serial.println(rpd_R ? "SIGNAL" : "none");
+
+      Serial.print("Carrier — Left: "); Serial.print(tc_L ? "DETECTED" : "none");
+      Serial.print("  |  Right: ");     Serial.println(tc_R ? "DETECTED" : "none");
+
+      Serial.print("ARC     — Left: "); Serial.print(arc_L);
+      Serial.print("  |  Right: ");     Serial.println(arc_R);
 
       Serial.print("Left:");
       Serial.print(leftTotal);
