@@ -1,28 +1,49 @@
 #include <RF24.h>
 #include <SPI.h>
 
-// RF24(CE_pin, CSN_pin)
-RF24 radio(8, 7);
-// RF24 radio(9, 2);
+RF24 radio(7, 8);  // CE=7, CSN=8
+
+const byte address1[6] = "00001";  // radioLeft  — channel 100
+const byte address2[6] = "00002";  // radioRight — channel 110
+
+char payload[32] = "ping";
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial); // Wait for serial on Uno
+
+  pinMode(8, OUTPUT); digitalWrite(8, HIGH);
 
   if (radio.begin()) {
-    Serial.println("radio.begin() = true (SPI OK)");
+    Serial.println("begin(): OK");
   } else {
-    Serial.println("radio.begin() = false — check SPI wiring & power!");
+    Serial.println("begin(): FAILED — check wiring & power!");
     while (1);
   }
 
-  if (radio.isChipConnected()) {
-    Serial.println("isChipConnected() = true — NRF24L01 detected!");
-  } else {
-    Serial.println("isChipConnected() = false — module not found");
-  }
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.setAutoAck(false);
+  radio.stopListening(); // Transmit mode
 
-  radio.printDetails(); // Print all register values
+  Serial.println("Transmitter ready.");
 }
 
-void loop() {}
+void loop() {
+  // --- Broadcast to radioLeft (channel 100, address 00001) ---
+  radio.setChannel(100);
+  radio.openWritingPipe(address1);
+  bool ok1 = radio.write(&payload, sizeof(payload));
+  Serial.print("Sent to LEFT  (ch100): ");
+  Serial.println(ok1 ? "OK" : "FAIL");
+
+  delay(10); // Short gap before switching
+
+  // --- Broadcast to radioRight (channel 110, address 00002) ---
+  radio.setChannel(110);
+  radio.openWritingPipe(address2);
+  bool ok2 = radio.write(&payload, sizeof(payload));
+  Serial.print("Sent to RIGHT (ch100): ");
+  Serial.println(ok2 ? "OK" : "FAIL");
+
+  delay(10); // ~50 packets/sec to each receiver
+}

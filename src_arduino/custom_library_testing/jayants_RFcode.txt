@@ -6,8 +6,8 @@
 //      RF RECEIVER SETUP
 // -------------------------------------------------------------------------------
 
-RF24 radioLeft(8, 7);   // CE=8, CSN=7
-RF24 radioRight(9, 2); // CE=9, CSN=2
+RF24 radioLeft(7, 8);   // CE=7, CSN=8
+RF24 radioRight(9, 10); // CE=9, CSN=10
 
 const byte address1[6] = "00001";
 const byte address2[6] = "00002";
@@ -16,7 +16,7 @@ int leftPackets  = 0;
 int rightPackets = 0;
 
 unsigned long lastMeasure = 0;
-const unsigned long MEASURE_INTERVAL = 100; // ms
+const unsigned long MEASURE_INTERVAL = 1000; // ms
 
 // -------------------------------------------------------------------------------
 //      SETUP
@@ -45,7 +45,7 @@ void setup() {
 
   Serial.print("radioLeft  connected (CE=7, CSN=8):  ");
   Serial.println(radioLeft.isChipConnected()  ? "YES" : "NO");
-  Serial.print("radioRight connected (CE=9, CSN=2): ");
+  Serial.print("radioRight connected (CE=9, CSN=10): ");
   Serial.println(radioRight.isChipConnected() ? "YES" : "NO");
 
   Serial.println("System ready.");
@@ -57,16 +57,16 @@ void setup() {
 
 void loop() {
   // Drain entire LEFT buffer
-  if (radioLeft.available()) {
+  while (radioLeft.available()) {
     char text[32];
     radioLeft.read(&text, sizeof(text));
     leftPackets++;
   }
 
-  delayMicroseconds(100); // SPI bus settle before switching radios
+  delayMicroseconds(50); // SPI bus settle before switching radios
 
   // Drain entire RIGHT buffer
-  if (radioRight.available()) {
+  while (radioRight.available()) {
     char text[32];
     radioRight.read(&text, sizeof(text));
     rightPackets++;
