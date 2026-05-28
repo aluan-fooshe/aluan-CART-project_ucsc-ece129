@@ -16,7 +16,12 @@ int leftPackets  = 0;
 int rightPackets = 0;
 
 unsigned long lastMeasure = 0;
-const unsigned long MEASURE_INTERVAL = 100; // ms
+const unsigned long MEASURE_INTERVAL = 50; // ms
+
+int printEveryInstanceOf = 10;
+int counter = 0;
+int leftTotal  = 0;
+int rightTotal = 0;
 
 // -------------------------------------------------------------------------------
 //      SETUP
@@ -78,35 +83,34 @@ void loop() {
 
   // Every second, print packet counts
   if (millis() - lastMeasure >= MEASURE_INTERVAL) {
+    counter++;
 
-    int difference   = leftPackets - rightPackets;
-    int totalPackets = leftPackets + rightPackets;
+    // Accumulate every interval
+    leftTotal  += leftPackets;
+    rightTotal += rightPackets;
 
-    Serial.print("Left:");
-    Serial.print(leftPackets);
-    Serial.print("  Right:");
-    Serial.print(rightPackets);
-    Serial.print("  Diff:");
-    Serial.print(difference);
-    Serial.print("  Total:");
-    Serial.println(totalPackets);
+    if (counter >= printEveryInstanceOf) {
+      int difference   = leftTotal - rightTotal;
+      int totalPackets = leftTotal + rightTotal;
 
-    // Position
-    if      (difference >  2) Serial.println("Position: LEFT");
-    else if (difference < -2) Serial.println("Position: RIGHT");
-    else                      Serial.println("Position: CENTER");
+      Serial.print("Left:");
+      Serial.print(leftTotal);
+      Serial.print("  Right:");
+      Serial.print(rightTotal);
+      Serial.print("  Diff:");
+      Serial.print(difference);
+      Serial.print("  Total:");
+      Serial.println(totalPackets);
+      Serial.println();
 
-    // Distance
-    if      (totalPackets > 120) Serial.println("Distance: VERY CLOSE");
-    else if (totalPackets >  60) Serial.println("Distance: MEDIUM");
-    else if (totalPackets >  20) Serial.println("Distance: FAR");
-    else if (totalPackets >   0) Serial.println("Distance: VERY FAR");
-    else                         Serial.println("Distance: NO SIGNAL");
+      // Reset accumulators and counter
+      leftTotal  = 0;
+      rightTotal = 0;
+      counter    = 0;
+      }
 
-    Serial.println();
-
-    leftPackets  = 0;
-    rightPackets = 0;
-    lastMeasure  = millis();
-  }
+      leftPackets  = 0;
+      rightPackets = 0;
+      lastMeasure  = millis();
+    }
 }

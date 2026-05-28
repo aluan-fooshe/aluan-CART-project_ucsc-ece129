@@ -21,7 +21,7 @@ void setup() {
   }
 
   radio.setDataRate(RF24_250KBPS);
-  radio.setPALevel(RF24_PA_LOW);
+  radio.setPALevel(RF24_PA_MIN); // TO MAKE THE RADIO "WORSE"!!!
   radio.setAutoAck(false);
   radio.stopListening(); // Transmit mode
 
