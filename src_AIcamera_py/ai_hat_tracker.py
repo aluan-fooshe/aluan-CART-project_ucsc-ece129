@@ -6,7 +6,6 @@ from gpiozero import AngularServo
 # Replaced ___.pigpio and PiGPIOFactory with ___.lgpio and LGPIOFactory
 from gpiozero.pins.lgpio import LGPIOFactory
 
-
 # 1. INITIALIZE SERVOS
 # We use pigpio factory for smooth hardware PWM. (Run 'sudo pigpiod' in terminal first!)
 factory = LGPIOFactory()
@@ -24,32 +23,6 @@ FRAME_W = 640
 FRAME_H = 480
 CENTER_X = FRAME_W // 2
 CENTER_Y = FRAME_H // 2
-
-# HSV Color Range for Orange
-LOWER_ORANGE = np.array([5, 100, 100])
-UPPER_ORANGE = np.array([25, 255, 255])
-
-def update_servos(target_x, target_y):
-    global pan_angle, tilt_angle
-    
-    # Calculate error (how far the target is from the center of the frame)
-    error_x = target_x - CENTER_X
-    error_y = target_y - CENTER_Y
-    
-    # Proportional Gain (Tune these values if the camera moves too fast/slow)
-    Kp_pan = 0.05 
-    Kp_tilt = 0.05 
-    
-    # Adjust angles
-    pan_angle -= (error_x * Kp_pan)   # Minus or Plus depends on your servo orientation
-    tilt_angle += (error_y * Kp_tilt) 
-    
-    # Clamp angles to prevent grinding servos
-    pan_angle = max(-90, min(90, pan_angle))
-    tilt_angle = max(-90, min(90, tilt_angle))
-    
-    pan_servo.angle = pan_angle
-    tilt_servo.angle = tilt_angle
 
 def main():
     print("Initializing AI Camera...")
@@ -90,34 +63,13 @@ def main():
                         if head_roi.size == 0:
                             continue
                             
-                        hsv_roi = cv2.cvtColor(head_roi, cv2.COLOR_BGR2HSV)
-                        
-                        # Create a mask to isolate orange pixels
-                        mask = cv2.inRange(hsv_roi, LOWER_ORANGE, UPPER_ORANGE)
-                        orange_pixel_count = cv2.countNonZero(mask)
-                        
-                        # If a significant chunk of the head area is orange, we found our target!
-                        if orange_pixel_count > 50:
-                            # Calculate the center of the person's bounding box
-                            target_center_x = x + (w // 2)
-                            target_center_y = y + (h // 2)
-                            
-                            # Draw visualizations for debugging
-                            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                            cv2.rectangle(frame, (head_x1, head_y1), (head_x2, head_y2), (0, 165, 255), 2)
-                            cv2.circle(frame, (target_center_x, target_center_y), 5, (0, 0, 255), -1)
-                            cv2.putText(frame, "Target Acquired", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                            
-                            # Move the servos to track
-                            update_servos(target_center_x, target_center_y)
-                            
-                            # Break out of loop so we only track one orange-hatted person at a time
-                            break 
-                            
             # Show the video feed
             # Note: OpenCV uses BGR natively, but Picamera2 outputs RGB. We convert it for display.
-            bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            cv2.imshow("AI Orange Hat Tracker", bgr_frame)
+            #       The bgr_frame variable creates a blue filter by default, but it can also do;
+        #               Greyscale, Hue Saturation & Value, etc.
+            # bgr_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            cv2.imshow("AI Orange Hat Tracker", frame)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

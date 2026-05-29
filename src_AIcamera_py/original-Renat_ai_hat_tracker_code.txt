@@ -1,0 +1,132 @@
+import cv2
+import numpy as np
+import time
+from picamera2 import Picamera2
+from gpiozero import AngularServo
+from gpiozero.pins.pigpio import PiGPIOFactory
+
+# 1. INITIALIZE SERVOS
+# We use pigpio factory for smooth hardware PWM. (Run 'sudo pigpiod' in terminal first!)
+factory = PiGPIOFactory()
+pan_servo = AngularServo(17, min_angle=-90, max_angle=90, pin_factory=factory)
+tilt_servo = AngularServo(27, min_angle=-90, max_angle=90, pin_factory=factory)
+
+# Initial center position
+pan_angle = 0
+tilt_angle = 0
+pan_servo.angle = pan_angle
+tilt_servo.angle = tilt_angle
+
+# 2. CAMERA AND FRAME SETTINGS
+FRAME_W = 640
+FRAME_H = 480
+CENTER_X = FRAME_W // 2
+CENTER_Y = FRAME_H // 2
+
+# HSV Color Range for Orange
+LOWER_ORANGE = np.array([5, 100, 100])
+UPPER_ORANGE = np.array([25, 255, 255])
+
+def update_servos(target_x, target_y):
+    global pan_angle, tilt_angle
+    
+    # Calculate error (how far the target is from the center of the frame)
+    error_x = target_x - CENTER_X
+    error_y = target_y - CENTER_Y
+    
+    # Proportional Gain (Tune these values if the camera moves too fast/slow)
+    Kp_pan = 0.05 
+    Kp_tilt = 0.05 
+    
+    # Adjust angles
+    pan_angle -= (error_x * Kp_pan)   # Minus or Plus depends on your servo orientation
+    tilt_angle += (error_y * Kp_tilt) 
+    
+    # Clamp angles to prevent grinding servos
+    pan_angle = max(-90, min(90, pan_angle))
+    tilt_angle = max(-90, min(90, tilt_angle))
+    
+    pan_servo.angle = pan_angle
+    tilt_servo.angle = tilt_angle
+
+def main():
+    print("Initializing AI Camera...")
+    picam2 = Picamera2()
+    
+    # Configure camera stream
+    config = picam2.create_preview_configuration(main={"size": (FRAME_W, FRAME_H), "format": "RGB888"})
+    picam2.configure(config)
+    picam2.start()
+    
+    print("Tracking Started. Press Ctrl+C to exit.")
+    
+    try:
+        while True:
+            # Capture frame and AI metadata simultaneously
+            frame = picam2.capture_array()
+            metadata = picam2.capture_metadata()
+            
+            # The IMX500 populates 'objects' when it detects COCO classifications
+            if "objects" in metadata:
+                for obj in metadata["objects"]:
+                    label = obj.get("label", "")
+                    score = obj.get("score", 0.0)
+                    
+                    # Check if the AI sees a person with > 50% confidence
+                    if label == "person" and score > 0.50:
+                        # Extract Bounding Box
+                        x, y, w, h = obj["bbox"]
+                        
+                        # Calculate the top 25% of the bounding box (The Head/Hat area)
+                        head_y1 = max(0, y)
+                        head_y2 = min(FRAME_H, int(y + (h * 0.25)))
+                        head_x1 = max(0, x)
+                        head_x2 = min(FRAME_W, x + w)
+                        
+                        # Crop the head area and convert to HSV color space
+                        head_roi = frame[head_y1:head_y2, head_x1:head_x2]
+                        if head_roi.size == 0:
+                            continue
+                            
+                        hsv_roi = cv2.cvtColor(head_roi, cv2.COLOR_BGR2HSV)
+                        
+                        # Create a mask to isolate orange pixels
+                        mask = cv2.inRange(hsv_roi, LOWER_ORANGE, UPPER_ORANGE)
+                        orange_pixel_count = cv2.countNonZero(mask)
+                        
+                        # If a significant chunk of the head area is orange, we found our target!
+                        if orange_pixel_count > 50:
+                            # Calculate the center of the person's bounding box
+                            target_center_x = x + (w // 2)
+                            target_center_y = y + (h // 2)
+                            
+                            # Draw visualizations for debugging
+                            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                            cv2.rectangle(frame, (head_x1, head_y1), (head_x2, head_y2), (0, 165, 255), 2)
+                            cv2.circle(frame, (target_center_x, target_center_y), 5, (0, 0, 255), -1)
+                            cv2.putText(frame, "Target Acquired", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                            
+                            # Move the servos to track
+                            update_servos(target_center_x, target_center_y)
+                            
+                            # Break out of loop so we only track one orange-hatted person at a time
+                            break 
+                            
+            # Show the video feed
+            # Note: OpenCV uses BGR natively, but Picamera2 outputs RGB. We convert it for display.
+            bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            cv2.imshow("AI Orange Hat Tracker", bgr_frame)
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+    except KeyboardInterrupt:
+        print("Exiting cleanly...")
+    finally:
+        picam2.stop()
+        cv2.destroyAllWindows()
+        pan_servo.detach()
+        tilt_servo.detach()
+
+if __name__ == "__main__":
+    main()
