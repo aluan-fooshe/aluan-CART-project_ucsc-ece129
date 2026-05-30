@@ -85,13 +85,11 @@ def main():
                     size = avg_radius * 2
 
                     # Distance estimation
-                    distance_cm = calculate_distance(size)
+                    distance_cm = int(round(calculate_distance(size)))
 
                     cv2.rectangle(frame, (x, y), (x + size, y + size), (0, 255, 0), 2)
                     cv2.putText(frame, f"Dist: {distance_cm:.1f} cm", (x, y - 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-                    cv2.putText(frame, f"W: {size}px  H: {size}px", (x, y + size + 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
                     cv2.putText(frame, "Orange detected", (x, y - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
             cv2.imshow("Orange Hat Distance Tracker", frame)
