@@ -8,8 +8,8 @@ KNOWN_WIDTH_CM = 20.0
 FOCAL_LENGTH = 500.0   
 
 # HSV Color Boundaries for Orange
-LOWER_ORANGE = np.array([5, 100, 100])
-UPPER_ORANGE = np.array([25, 255, 255])
+LOWER_ORANGE = np.array([110, 110, 140])
+UPPER_ORANGE = np.array([120, 160, 200])
 
 def main():
     print("Initializing Raspberry Pi AI Camera on Pi 5...")
