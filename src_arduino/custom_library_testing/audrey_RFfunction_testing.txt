@@ -1,0 +1,112 @@
+#include <RF24.h>
+#include <SPI.h>
+
+RF24 radioLeft(8, 7);   // CE=8, CSN=7
+RF24 radioRight(9, 2);  // CE=9, CSN=2
+
+int leftPackets  = 0;
+int rightPackets = 0;
+
+unsigned long lastMeasure = 0;
+const unsigned long MEASURE_INTERVAL = 1000; // ms
+
+
+void testRadio(RF24 &radio, const char* name) {
+  Serial.print("\n=== Testing ");
+  Serial.print(name);
+  Serial.println(" ===");
+
+  if (radio.begin()) {
+    Serial.println("begin()          : OK");
+  } else {
+    Serial.println("begin()          : FAILED — check SPI wiring & power!");
+    return; // No point continuing if begin() failed
+  }
+
+  Serial.print("isChipConnected(): ");
+  Serial.println(radio.isChipConnected() ? "YES" : "NO");
+
+  radio.printDetails();
+}
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+
+  // Hold both CSN pins HIGH before any SPI activity
+  pinMode(7, OUTPUT); digitalWrite(7, HIGH);
+  pinMode(2, OUTPUT); digitalWrite(2, HIGH);
+
+  testRadio(radioLeft,  "radioLeft  (CE=8, CSN=7)");
+  radioLeft.setChannel(100);
+  radioLeft.setDataRate(RF24_250KBPS);
+  radioLeft.setPALevel(RF24_PA_LOW);
+  radioLeft.setAutoAck(false);
+  radioLeft.openReadingPipe(1, (const byte*)"00001");
+  radioLeft.startListening();
+
+  delay(50);
+
+  testRadio(radioRight, "radioRight (CE=9, CSN=2)");
+  radioRight.setChannel(110);
+  radioRight.setDataRate(RF24_250KBPS);
+  radioRight.setPALevel(RF24_PA_LOW);
+  radioRight.setAutoAck(false);
+  radioRight.openReadingPipe(1, (const byte*)"00002");
+  radioRight.startListening();
+}
+
+void loop() {
+  bool rpd_L = radioLeft.testRPD();
+  bool rpd_R = radioRight.testRPD();
+
+  bool tc_L = radioLeft.testCarrier();
+  bool tc_R = radioRight.testCarrier();
+
+  uint8_t arc_L = radioLeft.getARC();
+  uint8_t arc_R = radioRight.getARC();
+
+  // --- Continuously drain radio buffers and count packets ---
+  if (radioLeft.available()) {
+    char text[32];
+    radioLeft.read(&text, sizeof(text));
+    leftPackets++;
+  }
+
+  if (radioRight.available()) {
+    char text[32];
+    radioRight.read(&text, sizeof(text));
+    rightPackets++;
+  }
+
+  // --- Every MEASURE_INTERVAL ms, decide what to do ---
+  if (millis() - lastMeasure >= MEASURE_INTERVAL) {
+
+    int difference   = leftPackets - rightPackets; // + = user left, - = user right
+    int totalPackets = leftPackets + rightPackets;
+
+    // --- Serial debug ---
+    Serial.print("Left:");
+    Serial.print(leftPackets);
+    Serial.print("  Right:");
+    Serial.print(rightPackets);
+    Serial.print("  Diff:");
+    Serial.print(difference);
+    Serial.print("  Total:");
+    Serial.println(totalPackets);
+
+  Serial.println("=== Radio Diagnostics ===");
+
+  Serial.print("RPD     — Left: "); Serial.print(rpd_L ? "SIGNAL" : "none");
+  Serial.print("  |  Right: ");     Serial.println(rpd_R ? "SIGNAL" : "none");
+
+  Serial.print("Carrier — Left: "); Serial.print(tc_L ? "DETECTED" : "none");
+  Serial.print("  |  Right: ");     Serial.println(tc_R ? "DETECTED" : "none");
+
+  Serial.print("ARC     — Left: "); Serial.print(arc_L);
+  Serial.print("  |  Right: ");     Serial.println(arc_R);
+
+  Serial.println();
+  delay(1000);
+  }
+}
