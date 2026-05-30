@@ -1,3 +1,5 @@
+import collections
+
 import cv2
 import numpy as np
 from picamera2 import Picamera2
@@ -14,7 +16,7 @@ FOCAL_LENGTH = 500.0
 
 # HSV Color Boundaries for Orange
 LOWER_ORANGE = np.array([110, 130, 120])
-UPPER_ORANGE = np.array([120, 190, 250])
+UPPER_ORANGE = np.array([120, 210, 250])
 
 # 2. CAMERA AND FRAME SETTINGS
 FRAME_W = 700
@@ -22,6 +24,9 @@ FRAME_H = 400
 CENTER_X = FRAME_W // 2
 CENTER_Y = FRAME_H // 2
 
+
+# Add before main()
+box_history = collections.deque(maxlen=10)
 
 def main():
     print("Initializing Raspberry Pi AI Camera on Pi 5...")
@@ -47,12 +52,32 @@ def main():
             if contours:
                 largest = max(contours, key=cv2.contourArea)
                 if cv2.contourArea(largest) > 100:
-                    x, y, w, h = cv2.boundingRect(largest)
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                    cv2.putText(frame, "Orange detected", (x, y-10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    # Get center and radius of the smallest enclosing circle
+                    (cx, cy), radius = cv2.minEnclosingCircle(largest)
+                    cx, cy, radius = int(cx), int(cy), int(radius)
 
+                    # Add current detection to history
+                    box_history.append((cx, cy, radius))
+
+                    # Average over history for smooth box
+                    avg_cx     = int(sum(b[0] for b in box_history) / len(box_history))
+                    avg_cy     = int(sum(b[1] for b in box_history) / len(box_history))
+                    avg_radius = int(sum(b[2] for b in box_history) / len(box_history))
+
+                    # Build a square bounding box using radius as half-width
+                    x = cx - radius
+                    y = cy - radius
+                    size = radius * 2  # width == height
+                    
+                    cv2.rectangle(frame, (x, y), (x + size, y + size), (0, 255, 0), 2)
+
+                    # Display width and height of the box
+                    cv2.putText(frame, f"W: {size}px  H: {size}px", (x, y + size + 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                    cv2.putText(frame, "Orange detected", (x, y - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
             cv2.imshow("Orange Hat Distance Tracker", frame)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break         
 
