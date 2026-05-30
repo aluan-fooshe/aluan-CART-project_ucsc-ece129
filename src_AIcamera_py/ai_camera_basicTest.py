@@ -32,6 +32,22 @@ CENTER_Y = FRAME_H // 2
 # Add before main()
 box_history = collections.deque(maxlen=10)
 
+def calculate_distance(apparent_width_px: int) -> float:
+    """
+    Estimate distance to target using similar triangles.
+    
+    distance = (known_real_width_cm * focal_length_px) / apparent_width_px
+    
+    Args:
+        apparent_width_px: The detected object's width in pixels
+    Returns:
+        Estimated distance in centimetres
+    """
+    if apparent_width_px <= 0:
+        return 0.0
+    return (KNOWN_WIDTH_CM * FOCAL_LENGTH) / apparent_width_px
+
+
 def main():
     print("Initializing Raspberry Pi AI Camera on Pi 5...")
     picam2 = Picamera2()
@@ -56,26 +72,24 @@ def main():
             if contours:
                 largest = max(contours, key=cv2.contourArea)
                 if cv2.contourArea(largest) > 30:
-                    # Get center and radius of the smallest enclosing circle
                     (cx, cy), radius = cv2.minEnclosingCircle(largest)
                     cx, cy, radius = int(cx), int(cy), int(radius)
 
-                    # Add current detection to history
                     box_history.append((cx, cy, radius))
-
-                    # Average over history for smooth box
                     avg_cx     = int(sum(b[0] for b in box_history) / len(box_history))
                     avg_cy     = int(sum(b[1] for b in box_history) / len(box_history))
                     avg_radius = int(sum(b[2] for b in box_history) / len(box_history))
 
-                    # Build a square bounding box using radius as half-width
-                    x = cx - radius
-                    y = cy - radius
-                    size = radius * 2  # width == height
-                    
-                    cv2.rectangle(frame, (x, y), (x + size, y + size), (0, 255, 0), 2)
+                    x = avg_cx - avg_radius      # use smoothed values for the box
+                    y = avg_cy - avg_radius
+                    size = avg_radius * 2
 
-                    # Display width and height of the box
+                    # Distance estimation
+                    distance_cm = calculate_distance(size)
+
+                    cv2.rectangle(frame, (x, y), (x + size, y + size), (0, 255, 0), 2)
+                    cv2.putText(frame, f"Dist: {distance_cm:.1f} cm", (x, y - 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
                     cv2.putText(frame, f"W: {size}px  H: {size}px", (x, y + size + 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
                     cv2.putText(frame, "Orange detected", (x, y - 10),
