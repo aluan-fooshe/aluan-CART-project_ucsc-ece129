@@ -14,9 +14,13 @@ imx500.show_network_fw_progress_bar()
 KNOWN_WIDTH_CM = 20.0  
 FOCAL_LENGTH = 500.0   
 
-# HSV Color Boundaries for Orange
-LOWER_ORANGE = np.array([110, 130, 120])
-UPPER_ORANGE = np.array([120, 210, 250])
+# HSV Color Boundaries for Orange1 (Renat's hat)
+LOWER_ORANGE1 = np.array([110, 130, 120])
+UPPER_ORANGE1 = np.array([140, 210, 250])
+
+# HSV Color Boundaries for Orange2 (Audrey's hat)
+LOWER_ORANGE2 = np.array([100, 130, 120])
+UPPER_ORANGE2 = np.array([130, 210, 250])
 
 # 2. CAMERA AND FRAME SETTINGS
 FRAME_W = 700
@@ -45,13 +49,13 @@ def main():
 
             # Scan the ENTIRE frame for orange, no AI needed
             hsv_full = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-            mask = cv2.inRange(hsv_full, LOWER_ORANGE, UPPER_ORANGE)
+            mask = cv2.inRange(hsv_full, LOWER_ORANGE2, UPPER_ORANGE2)
 
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             if contours:
                 largest = max(contours, key=cv2.contourArea)
-                if cv2.contourArea(largest) > 100:
+                if cv2.contourArea(largest) > 30:
                     # Get center and radius of the smallest enclosing circle
                     (cx, cy), radius = cv2.minEnclosingCircle(largest)
                     cx, cy, radius = int(cx), int(cy), int(radius)
