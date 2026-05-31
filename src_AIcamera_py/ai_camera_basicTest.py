@@ -16,11 +16,11 @@ FOCAL_LENGTH = 500.0
 
 # HSV Color Boundaries for Orange1 (Renat's hat)
 LOWER_ORANGE1 = np.array([110, 130, 120])
-UPPER_ORANGE1 = np.array([140, 210, 250])
+UPPER_ORANGE1 = np.array([130, 210, 250])
 
 # HSV Color Boundaries for Orange2 (Audrey's hat)
 LOWER_ORANGE2 = np.array([100, 130, 120])
-UPPER_ORANGE2 = np.array([130, 210, 250])
+UPPER_ORANGE2 = np.array([120, 210, 250])
 
 # 2. CAMERA AND FRAME SETTINGS
 FRAME_W = 700
