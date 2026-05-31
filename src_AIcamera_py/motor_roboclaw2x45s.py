@@ -26,19 +26,72 @@ import time
 from roboclaw_3 import Roboclaw
 
 RC_ADDRESS_FRONT = 0x80
-RC_ADDRESS_BACK = 0x81  #different address, same serial line
+RC_ADDRESS_BACK = 0x80  #different address, same serial line
 BAUDRATE = 38400
 
 speed = 20
 roboclaw_front = Roboclaw("/dev/ttyAMA0", BAUDRATE)
 roboclaw_back = Roboclaw("/dev/ttyAMA3", BAUDRATE)
 
+# Python implementation of roboclaw rebooting time, yet to be tested.
+def wait_for_roboclaw(rc, address, timeout=5.0):
+    """Wait until RoboClaw responds or timeout."""
+    start = time.time()
+    while time.time() - start < timeout:
+        version = rc.ReadVersion(address)
+        if version[0]:  # returns (success, version_string)
+            print(f"RoboClaw ready: {version[1].strip()}")
+            return True
+        time.sleep(0.1)
+    raise TimeoutError("RoboClaw did not respond in time")
+
+def moveForward(speed, delay_time):
+    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, speed)
+    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, speed)
+    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, speed)
+    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, speed)
+    time.sleep(delay_time)
+
+def moveBackward(speed, delay_time):
+    roboclaw_front.BackwardM1(RC_ADDRESS_FRONT, speed)
+    roboclaw_front.BackwardM2(RC_ADDRESS_FRONT, speed)
+    roboclaw_back.BackwardM1(RC_ADDRESS_BACK, speed)
+    roboclaw_back.BackwardM2(RC_ADDRESS_BACK, speed)
+    time.sleep(delay_time)
+
+def turnLeft(speed, delay_time):
+    roboclaw_front.BackwardM1(RC_ADDRESS_FRONT, speed)
+    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, speed)
+    roboclaw_back.BackwardM1(RC_ADDRESS_BACK, speed)
+    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, speed)
+    time.sleep(delay_time)
+
+def turnRight(speed, delay_time):
+    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, speed)
+    roboclaw_front.BackwardM2(RC_ADDRESS_FRONT, speed)
+    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, speed)
+    roboclaw_back.BackwardM2(RC_ADDRESS_BACK, speed)
+    time.sleep(delay_time)
+
+def stopAll():
+    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, speed)
+    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, speed)
+    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, speed)
+    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, speed)
+    # time.sleep(delay_time)
+
+
 if __name__ == "__main__":
     if roboclaw_front.Open():
         print("roboclaw front works!")
-    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, speed)
-    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, speed)
-    time.sleep(5)
+    if roboclaw_back.Open():
+        print("roboclaw back works!")
+
+    time.sleep(2)
+
+    moveForward(speed, 5)
     roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, 0)
     roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, 0)
+    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, 0)
+    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, 0)
     time.sleep(5)
