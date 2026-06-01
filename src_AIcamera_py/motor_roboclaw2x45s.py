@@ -21,6 +21,7 @@ Dependencies:
   -
 """
 
+import threading
 import serial
 import time
 from roboclaw_3 import Roboclaw
@@ -76,17 +77,17 @@ def stopAll():
     roboclaw_back.ForwardM2(RC_ADDRESS_BACK, 0)
 
 
-if __name__ == "__main__":
-    if roboclaw_front.Open():
-        print("roboclaw front works!")
-    if roboclaw_back.Open():
-        print("roboclaw back works!")
+# if __name__ == "__main__":
+#     if roboclaw_front.Open():
+#         print("roboclaw front works!")
+#     if roboclaw_back.Open():
+#         print("roboclaw back works!")
 
-    time.sleep(2)
+#     time.sleep(2)
 
-    moveForward(speed, 5)
-    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, 0)
-    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, 0)
-    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, 0)
-    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, 0)
-    time.sleep(5)
+#     moveForward(speed, 5)
+#     roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, 0)
+#     roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, 0)
+#     roboclaw_back.ForwardM1(RC_ADDRESS_BACK, 0)
+#     roboclaw_back.ForwardM2(RC_ADDRESS_BACK, 0)
+#     time.sleep(5)

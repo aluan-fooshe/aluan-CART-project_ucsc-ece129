@@ -13,9 +13,9 @@ from picamera2.devices.imx500 import IMX500
 RC.roboclaw_front.Open()
 RC.roboclaw_back.Open()
 
-# # Load the COCO object detection model onto the IMX500 chip
-# imx500 = IMX500("/usr/share/imx500-models/imx500_network_ssd_mobilenetv2_fpnlite_320x320_pp.rpk")
-# imx500.show_network_fw_progress_bar()
+# Load the COCO object detection model onto the IMX500 chip
+imx500 = IMX500("/usr/share/imx500-models/imx500_network_ssd_mobilenetv2_fpnlite_320x320_pp.rpk")
+imx500.show_network_fw_progress_bar()
 
 # --- CALIBRATION CONSTANTS ---
 # Adjust these based on your specific orange hat and environment
@@ -46,6 +46,7 @@ THIRD_LEFT  = FRAME_W // 3          # x = 0   to 233
 THIRD_RIGHT = (FRAME_W // 3) * 2   # x = 233  to 466
 # Right zone: THIRD_RIGHT to FRAME_W (466 to 700)
 
+
 def get_zone(cx: int) -> str:
     """Return which horizontal third of the frame the target is in."""
     if cx < THIRD_LEFT:
@@ -56,30 +57,30 @@ def get_zone(cx: int) -> str:
         return "RIGHT"
 
 
-def CART_statemachine(distance_cm, speed, zone):
+def CART_statemachine(distance_cm, zone):
     # Steering takes priority — correct heading first
     if zone == "LEFT":
-        RC.turnLeft(int(speed * 1.3))
+        # RC.turnLeft(int(speed * 1.3))
         return "turnLeft"
     elif zone == "RIGHT":
-        RC.turnRight(int(speed * 1.3))
+        # RC.turnRight(int(speed * 1.3))
         return "turnRight"
 
     # Only reach here if zone == "MIDDLE"
     if distance_cm <= 100:
-        RC.stopAll()
+        # RC.stopAll()
         return "stopAll"
     elif distance_cm <= 200:
-        RC.moveForward(speed)
+        # RC.moveForward(speed)
         return "moveForward"
     elif distance_cm <= 300:
-        RC.moveForward(speed * 1.5)
+        # RC.moveForward(speed * 1.5)
         return "moveForward_1.5x"
     elif distance_cm <= 400:
-        RC.moveForward(speed * 2)
+        # RC.moveForward(speed * 2)
         return "moveForward_2x"
     else:
-        RC.stopAll()
+        # RC.stopAll()
         return "stopAll"
 
 
@@ -100,27 +101,24 @@ def calculate_distance(apparent_width_px: int) -> float:
 
 
 def main():
-        # Open roboclaw serial ports
-    if not RC.roboclaw_front.Open():
-        raise RuntimeError("Failed to open front roboclaw on /dev/ttyAMA0")
-    if not RC.roboclaw_back.Open():
-        raise RuntimeError("Failed to open back roboclaw on /dev/ttyAMA3")
-
     print("Initializing Raspberry Pi AI Camera on Pi 5...")
     picam2 = Picamera2()
 
+    # Configure camera for RGB output
     config = picam2.create_preview_configuration(main={"size": (FRAME_W, FRAME_H), "format": "RGB888"})
     picam2.configure(config)
     picam2.start()
 
     print("Camera active. Press 'q' in the video window to quit.")
 
+    # Smoothed display values — only updated once deque is full (10 samples)
     smoothed = {"cx": 0, "cy": 0, "radius": 0}
 
     try:
         while True:
             frame = picam2.capture_array()
 
+            # Scan the ENTIRE frame for orange, no AI needed
             hsv_full = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
             mask = cv2.inRange(hsv_full, LOWER_ORANGE2, UPPER_ORANGE2)
 
@@ -162,7 +160,7 @@ def main():
 
             # Draw using the last fully-averaged values (stays blank until first 10 samples)
             if smoothed["radius"] > 0:
-                avg_cx     = smoothed["cx"]   # <-- avg_cx is defined HERE
+                avg_cx     = smoothed["cx"]
                 avg_cy     = smoothed["cy"]
                 avg_radius = smoothed["radius"]
 
@@ -177,22 +175,26 @@ def main():
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
                 cv2.putText(frame, "Orange detected", (x, y - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-
+                
                 # Zone detection — now avg_cx is valid
                 zone = get_zone(avg_cx)
 
                 # CART state machine implementation
-                action = CART_statemachine(distance_cm, speed, zone)
+                action = CART_statemachine(distance_cm, zone)
+
+                if action == "moveForward":
+                    RC.moveForward(speed)
+                else:
+                    RC.stopAll()
+
                 cv2.putText(frame, f"Action: {action}", (10, 90),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
 
                 cv2.putText(frame, f"Zone: {zone}", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
-            
-            else:
-                # No orange detected this frame
-                RC.stopAll()
 
+
+            # Show how many samples have been collected while warming up
             if len(box_history) < box_history.maxlen:
                 cv2.putText(frame, f"Warming up: {len(box_history)}/{box_history.maxlen}",
                             (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
