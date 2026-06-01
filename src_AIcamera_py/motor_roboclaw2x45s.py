@@ -3,22 +3,7 @@ Python equivalent of CART_current_draw_testing.ino
 Original authors: Audrey Luan, Noah Lee, Renat Dobornian
 
 Reads current draw, voltage, speed, and battery temperature from a
-4-wheel cart driven by two RoboClaw 2x45A controllers (FRONT + BACK),
-with optional NRF24L01 radio support.
-
-Hardware wiring (Raspberry Pi GPIO → RoboClaw):
-  FRONT RoboClaw:
-    Pi TX  (GPIO 14, pin 8)  → RoboClaw S1
-    Pi RX  (GPIO 15, pin 10) → RoboClaw S2
-    → SERIAL_PORT_FRONT = -
-
-  BACK RoboClaw (needs a second UART or USB-serial adapter):
-    Pi TX2 / USB adapter     → RoboClaw S1
-    Pi RX2 / USB adapter     → RoboClaw S2
-    → SERIAL_PORT_BACK  = -
-
-Dependencies:
-  -
+4-wheel cart driven by two RoboClaw 2x45A controllers (FRONT + BACK).
 """
 
 import threading
@@ -46,36 +31,30 @@ def wait_for_roboclaw(rc, address, timeout=5.0):
         time.sleep(0.1)
     raise TimeoutError("RoboClaw did not respond in time")
 
-def moveForward(speed):
-    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, speed)
-    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, speed)
-    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, speed)
-    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, speed)
 
-def moveBackward(speed):
-    roboclaw_front.BackwardM1(RC_ADDRESS_FRONT, speed)
-    roboclaw_front.BackwardM2(RC_ADDRESS_FRONT, speed)
-    roboclaw_back.BackwardM1(RC_ADDRESS_BACK, speed)
-    roboclaw_back.BackwardM2(RC_ADDRESS_BACK, speed)
+def moveForward(roboclaw, address, speed):
+    roboclaw.ForwardM1(address, speed)
+    roboclaw.ForwardM2(address, speed)
 
-def turnLeft(speed):
-    roboclaw_front.BackwardM1(RC_ADDRESS_FRONT, speed)
-    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, speed)
-    roboclaw_back.BackwardM1(RC_ADDRESS_BACK, speed)
-    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, speed)
+def moveBackward(roboclaw, address, speed):
+    roboclaw.BackwardM1(address, speed)
+    roboclaw.BackwardM2(address, speed)
 
-def turnRight(speed):
-    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, speed)
-    roboclaw_front.BackwardM2(RC_ADDRESS_FRONT, speed)
-    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, speed)
-    roboclaw_back.BackwardM2(RC_ADDRESS_BACK, speed)
 
-def stopAll():
-    roboclaw_front.ForwardM1(RC_ADDRESS_FRONT, 0)
-    roboclaw_front.ForwardM2(RC_ADDRESS_FRONT, 0)
-    roboclaw_back.ForwardM1(RC_ADDRESS_BACK, 0)
-    roboclaw_back.ForwardM2(RC_ADDRESS_BACK, 0)
+def turnLeft(roboclaw, address, speed):
+    roboclaw.BackwardM1(address, speed)
+    roboclaw.ForwardM2(address, speed)
 
+
+def turnRight(roboclaw, address, speed):
+    roboclaw.ForwardM1(address, speed)
+    roboclaw.BackwardM2(address, speed)
+
+
+def stopAll(roboclaw, address):
+    roboclaw.ForwardM1(address, 0)
+    roboclaw.ForwardM2(address, 0)
+    
 
 # if __name__ == "__main__":
 #     if roboclaw_front.Open():
