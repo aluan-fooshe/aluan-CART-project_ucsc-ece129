@@ -1,6 +1,6 @@
 # custom created python libraries
 # Author: Audrey Luan
-import motor_roboclaw2x45s as RC
+import motor_roboclaw2x45s
 
 # imported libraries
 import collections
@@ -9,13 +9,9 @@ import numpy as np
 from picamera2 import Picamera2
 from picamera2.devices.imx500 import IMX500
 
-# Open roboclaw serial ports
-RC.roboclaw_front.Open()
-RC.roboclaw_back.Open()
-
-# # Load the COCO object detection model onto the IMX500 chip
-# imx500 = IMX500("/usr/share/imx500-models/imx500_network_ssd_mobilenetv2_fpnlite_320x320_pp.rpk")
-# imx500.show_network_fw_progress_bar()
+# Load the COCO object detection model onto the IMX500 chip
+imx500 = IMX500("/usr/share/imx500-models/imx500_network_ssd_mobilenetv2_fpnlite_320x320_pp.rpk")
+imx500.show_network_fw_progress_bar()
 
 # --- CALIBRATION CONSTANTS ---
 # Adjust these based on your specific orange hat and environment
@@ -36,7 +32,6 @@ FRAME_H = 400
 CENTER_X = FRAME_W // 2
 CENTER_Y = FRAME_H // 2
 
-speed = 20
 
 # Add before main()
 box_history = collections.deque(maxlen=10)
@@ -55,34 +50,6 @@ def get_zone(cx: int) -> str:
     else:
         return "RIGHT"
 
-
-def CART_statemachine(distance_cm, speed, zone):
-    # Steering takes priority — correct heading first
-    if zone == "LEFT":
-        RC.turnLeft(int(speed * 1.3))
-        return "turnLeft"
-    elif zone == "RIGHT":
-        RC.turnRight(int(speed * 1.3))
-        return "turnRight"
-
-    # Only reach here if zone == "MIDDLE"
-    if distance_cm <= 100:
-        RC.stopAll()
-        return "stopAll"
-    elif distance_cm <= 200:
-        RC.moveForward(speed)
-        return "moveForward"
-    elif distance_cm <= 300:
-        RC.moveForward(speed * 1.5)
-        return "moveForward_1.5x"
-    elif distance_cm <= 400:
-        RC.moveForward(speed * 2)
-        return "moveForward_2x"
-    else:
-        RC.stopAll()
-        return "stopAll"
-
-
 def calculate_distance(apparent_width_px: int) -> float:
     """
     Estimate distance to target using similar triangles.
@@ -100,12 +67,6 @@ def calculate_distance(apparent_width_px: int) -> float:
 
 
 def main():
-        # Open roboclaw serial ports
-    if not RC.roboclaw_front.Open():
-        raise RuntimeError("Failed to open front roboclaw on /dev/ttyAMA0")
-    if not RC.roboclaw_back.Open():
-        raise RuntimeError("Failed to open back roboclaw on /dev/ttyAMA3")
-
     print("Initializing Raspberry Pi AI Camera on Pi 5...")
     picam2 = Picamera2()
 
@@ -180,18 +141,8 @@ def main():
 
                 # Zone detection — now avg_cx is valid
                 zone = get_zone(avg_cx)
-
-                # CART state machine implementation
-                action = CART_statemachine(distance_cm, speed, zone)
-                cv2.putText(frame, f"Action: {action}", (10, 90),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
-
                 cv2.putText(frame, f"Zone: {zone}", (10, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
-            
-            else:
-                # No orange detected this frame
-                RC.stopAll()
 
             if len(box_history) < box_history.maxlen:
                 cv2.putText(frame, f"Warming up: {len(box_history)}/{box_history.maxlen}",

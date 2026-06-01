@@ -75,26 +75,6 @@ def stopAll():
     roboclaw_back.ForwardM1(RC_ADDRESS_BACK, 0)
     roboclaw_back.ForwardM2(RC_ADDRESS_BACK, 0)
 
-def CART_statemachine(distance_cm, speed):
-    # this statement might cause issues
-    if distance_cm <= 50:
-        # moveBackward(speed, 1) # removed it to prevent potential issue from 
-        # going from backwards to forwards at 2x speed
-        stopAll()
-    # 1 meter
-    elif distance_cm > 50 and distance_cm <= 100:
-        stopAll()
-    elif distance_cm > 100 and distance_cm <= 200:
-        moveForward(speed)
-    elif distance_cm > 200 and distance_cm <= 300:
-        moveForward(speed * 1.5)
-    elif distance_cm > 300 and distance_cm <= 400:
-        moveForward(speed * 2)
-    # if distance_cm > 400. Done so the CART doesn't run over anyone if 
-    # its further than 4 meters.
-    else:
-       stopAll()
-
 
 if __name__ == "__main__":
     if roboclaw_front.Open():
