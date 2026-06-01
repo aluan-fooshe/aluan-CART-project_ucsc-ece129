@@ -22,15 +22,16 @@ def send_signal(arduino_pin, gpio_pin, value):
     lgpio.gpio_write(chip, gpio_pin, value)
     print(f"[gpio] GPIO {gpio_pin} → Arduino pin {arduino_pin} set {'HIGH' if value == 1 else 'LOW'}")
 
-# Example: pulse both pins HIGH then LOW
-send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
-send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
-time.sleep(1)
+if __name__ == "__main__":
+    # Example: pulse both pins HIGH then LOW
+    send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
+    send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
+    time.sleep(1)
 
-send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
-send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
-time.sleep(1)
+    send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+    send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+    time.sleep(1)
 
-# --- Cleanup ---
-lgpio.gpiochip_close(chip)
-print("[gpio] Chip closed, cleanup done")
+    # --- Cleanup ---
+    lgpio.gpiochip_close(chip)
+    print("[gpio] Chip closed, cleanup done")
