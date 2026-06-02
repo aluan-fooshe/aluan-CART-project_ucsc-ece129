@@ -103,28 +103,28 @@ def CART_statemachine(distance_cm, zone):
         return "turnRight"
     else:
         # Only reach here if zone == "MIDDLE"
-        if distance_cm <= 100:
+        if distance_cm < 100:
             # RC.stopAll()
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
             print("")
             return "stopAll"
-        elif distance_cm <= 200:
+        elif 100 <= distance_cm < 200:
             # RC.moveForward(speed)
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
             print("")
             return "moveForward"
-        elif distance_cm <= 300:
+        elif 200 <= distance_cm < 300:
             # RC.moveForward(speed * 1.5)
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
             print("")
             return "moveForward_1.5x"
-        elif distance_cm <= 400:
+        elif 300 <= distance_cm < 400:
             # RC.moveForward(speed * 2)
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
