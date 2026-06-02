@@ -1,5 +1,6 @@
 # custom created python libraries
 # Author: Audrey Luan
+import lgpio
 import motor_roboclaw2x45s as RC
 
 # imported libraries
@@ -8,6 +9,18 @@ import cv2
 import numpy as np
 from picamera2 import Picamera2
 from picamera2.devices.imx500 import IMX500
+
+# Open the GPIO chip (Pi 5 uses chip 4)
+chip = lgpio.gpiochip_open(4)
+print("[gpio] Chip opened successfully")
+
+# --- Declare pins ---
+# Pi GPIO 14 (pin 8)  → Arduino pin 7
+# Pi GPIO 15 (pin 10) → Arduino pin 8
+# Pi GPIO 9  (pin 21) → Arduino pin 9
+GPIO_TO_ARDUINO_7 = 14
+GPIO_TO_ARDUINO_8 = 15
+GPIO_TO_ARDUINO_9 = 9
 
 # Open roboclaw serial ports
 RC.roboclaw_front.Open()
@@ -47,6 +60,21 @@ THIRD_RIGHT = (FRAME_W // 3) * 2   # x = 233  to 466
 # Right zone: THIRD_RIGHT to FRAME_W (466 to 700)
 
 
+lgpio.gpio_claim_output(chip, GPIO_TO_ARDUINO_7)
+print(f"[gpio] GPIO {GPIO_TO_ARDUINO_7} claimed as OUTPUT → Arduino pin 7")
+
+lgpio.gpio_claim_output(chip, GPIO_TO_ARDUINO_8)
+print(f"[gpio] GPIO {GPIO_TO_ARDUINO_8} claimed as OUTPUT → Arduino pin 8")
+
+lgpio.gpio_claim_output(chip, GPIO_TO_ARDUINO_9)
+print(f"[gpio] GPIO {GPIO_TO_ARDUINO_9} claimed as OUTPUT → Arduino pin 9")
+
+# --- Send signals ---
+def send_signal(arduino_pin, gpio_pin, value):
+    lgpio.gpio_write(chip, gpio_pin, value)
+    print(f"[gpio] GPIO {gpio_pin} → Arduino pin {arduino_pin} set {'HIGH' if value == 1 else 'LOW'}")
+
+
 def get_zone(cx: int) -> str:
     """Return which horizontal third of the frame the target is in."""
     if cx < THIRD_LEFT:
@@ -61,27 +89,56 @@ def CART_statemachine(distance_cm, zone):
     # Steering takes priority — correct heading first
     if zone == "LEFT":
         # RC.turnLeft(int(speed * 1.3))
+        send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+        send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+        send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
+        print("")
         return "turnLeft"
     elif zone == "RIGHT":
         # RC.turnRight(int(speed * 1.3))
+        send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+        send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
+        send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+        print("")
         return "turnRight"
-
-    # Only reach here if zone == "MIDDLE"
-    if distance_cm <= 100:
-        # RC.stopAll()
-        return "stopAll"
-    elif distance_cm <= 200:
-        # RC.moveForward(speed)
-        return "moveForward"
-    elif distance_cm <= 300:
-        # RC.moveForward(speed * 1.5)
-        return "moveForward_1.5x"
-    elif distance_cm <= 400:
-        # RC.moveForward(speed * 2)
-        return "moveForward_2x"
     else:
-        # RC.stopAll()
-        return "stopAll"
+        # Only reach here if zone == "MIDDLE"
+        if distance_cm <= 100:
+            # RC.stopAll()
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+            print("")
+            return "stopAll"
+        elif distance_cm <= 200:
+            # RC.moveForward(speed)
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
+            print("")
+            return "moveForward"
+        elif distance_cm <= 300:
+            # RC.moveForward(speed * 1.5)
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+            print("")
+            return "moveForward_1.5x"
+        elif distance_cm <= 400:
+            # RC.moveForward(speed * 2)
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
+            print("")
+            return "moveForward_2x"
+        else:
+            # RC.stopAll()
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+            print("")
+            return "stopAll"
+        
 
 
 def calculate_distance(apparent_width_px: int) -> float:
@@ -189,10 +246,10 @@ def main():
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
 
 
-            # Show how many samples have been collected while warming up
-            if len(box_history) < box_history.maxlen:
-                cv2.putText(frame, f"Warming up: {len(box_history)}/{box_history.maxlen}",
-                            (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+            # # Show how many samples have been collected while warming up
+            # if len(box_history) < box_history.maxlen:
+            #     cv2.putText(frame, f"Warming up: {len(box_history)}/{box_history.maxlen}",
+            #                 (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
 
             cv2.imshow("Orange Hat Distance Tracker", frame)
 
