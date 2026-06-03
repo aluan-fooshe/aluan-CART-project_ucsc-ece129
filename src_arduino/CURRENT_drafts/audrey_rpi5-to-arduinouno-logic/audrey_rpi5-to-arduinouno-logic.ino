@@ -83,7 +83,7 @@ void rpi_to_motors(int val7, int val8, int val9) {
     //  cmd = 0b101 (5) → val7=1, val8=0, val9=1 → moveForward(speed*2.0)
 
     if (cmd == 0b000) {
-    stopAll();
+      stopAll();
   } else if (cmd == 0b001) {
       turnLeft(RC_ADDRESS, clampedSpeed(1.5));
   } else if (cmd == 0b010) {
@@ -124,9 +124,8 @@ void loop() {
     int val7 = digitalRead(PI_INPUT_PIN_7);
     int val8 = digitalRead(PI_INPUT_PIN_8);
     int val9 = digitalRead(PI_INPUT_PIN_9);
-    Serial.print("Pin 7: "); Serial.print(val7);
-    Serial.print(" | Pin 8: "); Serial.print(val8);
-    Serial.print(" | Pin 9: "); Serial.println(val9);
+    Serial.print("Pin7-8-9: "); Serial.print(val7); 
+    Serial.print(val8); Serial.println(val9);
 
     rpi_to_motors(val7, val8, val9);
     delay(100);
