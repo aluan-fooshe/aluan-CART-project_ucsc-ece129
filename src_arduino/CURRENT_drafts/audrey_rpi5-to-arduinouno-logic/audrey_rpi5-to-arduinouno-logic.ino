@@ -85,9 +85,11 @@ void rpi_to_motors(int val7, int val8, int val9) {
     if (cmd == 0b000) {
       stopAll();
   } else if (cmd == 0b001) {
-      turnLeft(RC_ADDRESS, clampedSpeed(1.5));
-  } else if (cmd == 0b010) {
+      // turnLeft(RC_ADDRESS, clampedSpeed(1.5));
       turnRight(RC_ADDRESS, clampedSpeed(1.5));
+  } else if (cmd == 0b010) {
+      // turnRight(RC_ADDRESS, clampedSpeed(1.5));
+      turnLeft(RC_ADDRESS, clampedSpeed(1.5));
   } else if (cmd == 0b011) {
       moveForward(RC_ADDRESS, speed);
   } else if (cmd == 0b100) {
@@ -127,6 +129,6 @@ void loop() {
     Serial.print("Pin7-8-9: "); Serial.print(val7); 
     Serial.print(val8); Serial.println(val9);
 
-    rpi_to_motors(val7, val8, val9);
+    // rpi_to_motors(val7, val8, val9);
     delay(100);
 }

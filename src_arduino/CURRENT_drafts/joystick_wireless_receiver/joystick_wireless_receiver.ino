@@ -23,7 +23,7 @@ RoboClaw roboclawBack(&backSerial, 100);
 #define Kd 0.25
 #define QPPS 100
 
-uint8_t given_speed = 20;
+uint8_t given_speed = 40;
 int given_time = 23000;
 
 //Joystick Data
@@ -108,6 +108,7 @@ void setup() {
 
 void loop() {
   
+  // 0 - 511 - 1023
   bool got_signal = radio.available();
   
   if (got_signal) {
@@ -120,29 +121,26 @@ void loop() {
     Serial.print(" Y: ");
     Serial.println(data.yValue);
 
-    if (data.xValue > 600) {
-
-      Serial.println("Forward");            // Moves Forward when joystick is forward
+    if (data.xValue > 600 && data.xValue < 800) {
+      Serial.println("Forward");
       moveForward(RC_ADDRESS, given_speed);
-
-    } else if (data.xValue < 400) {
-
-      Serial.println("Backward");           // Bckward when joystick is backwards
+    } else if (data.xValue > 800) {
+      Serial.println("FAST Forward");
+      moveForward(RC_ADDRESS, (uint8_t)(given_speed * 1.5));
+    } else if (data.xValue < 400 && data.xValue > 200) {
+      Serial.println("Backward");
       moveBackward(RC_ADDRESS, given_speed);
-
+    } else if (data.xValue < 200) {
+      Serial.println("FAST Backward");
+      moveBackward(RC_ADDRESS, (uint8_t)(given_speed * 1.5));
     } else if (data.yValue < 400) {
-
-      Serial.println("Turn Left");          // Left when joystick is left
+      Serial.println("Turn Left");
       turnLeft(RC_ADDRESS, given_speed);
-
     } else if (data.yValue > 600) {
-
-      Serial.println("Turn Right");         // Right when joystick is right
+      Serial.println("Turn Right");
       turnRight(RC_ADDRESS, given_speed);
-
     } else {
-
-      Serial.println("Stopped");           // Stop when no touch joystick
+      Serial.println("Stopped");
       stopAll();
     }
 
