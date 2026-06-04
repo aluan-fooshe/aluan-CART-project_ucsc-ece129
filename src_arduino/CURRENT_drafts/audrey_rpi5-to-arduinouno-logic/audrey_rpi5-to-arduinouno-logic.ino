@@ -129,6 +129,6 @@ void loop() {
     Serial.print("Pin7-8-9: "); Serial.print(val7); 
     Serial.print(val8); Serial.println(val9);
 
-    // rpi_to_motors(val7, val8, val9);
+    rpi_to_motors(val7, val8, val9);
     delay(100);
 }
