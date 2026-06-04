@@ -210,6 +210,15 @@ def main():
                         smoothed["cx"]     = int(sum(b[0] for b in box_history) / len(box_history))
                         smoothed["cy"]     = int(sum(b[1] for b in box_history) / len(box_history))
                         smoothed["radius"] = int(sum(b[2] for b in box_history) / len(box_history))
+                
+                else:
+                    # Contour too small — noise
+                    box_history.clear()
+                    smoothed = {"cx": 0, "cy": 0, "radius": 0}
+            else:
+                # Hat left the frame entirely
+                box_history.clear()
+                smoothed = {"cx": 0, "cy": 0, "radius": 0}
 
             # Draw zone dividers every frame regardless of detection
             cv2.line(frame, (THIRD_LEFT, 0),  (THIRD_LEFT, FRAME_H),  (255, 0, 0), 1)
@@ -246,11 +255,15 @@ def main():
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
 
 
-            # # Show how many samples have been collected while warming up
-            # if len(box_history) < box_history.maxlen:
-            #     cv2.putText(frame, f"Warming up: {len(box_history)}/{box_history.maxlen}",
-            #                 (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
-
+            else:
+                # No target — stop all motors
+                send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+                send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+                send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+                cv2.putText(frame, "No target | stopAll", (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+                print("stopAll\n")
+                
             cv2.imshow("Orange Hat Distance Tracker", frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -261,6 +274,8 @@ def main():
     finally:
         picam2.stop()
         cv2.destroyAllWindows()
+        lgpio.gpiochip_close(chip)  # ← add this
+        print("Cleanup done.")
 
 if __name__ == "__main__":
     main()

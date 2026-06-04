@@ -11,6 +11,9 @@ from picamera2 import Picamera2
 from picamera2.devices.imx500 import IMX500
 import signal
 
+# sudo systemctl enable ai_camera_headless.service
+# sudo journalctl -u ai_camera_headless.service -f
+
 # Open the GPIO chip (Pi 5 uses chip 4)
 chip = lgpio.gpiochip_open(4)
 print("[gpio] Chip opened successfully")
@@ -67,11 +70,13 @@ print(f"[gpio] GPIO {GPIO_TO_ARDUINO_8} claimed as OUTPUT → Arduino pin 8")
 lgpio.gpio_claim_output(chip, GPIO_TO_ARDUINO_9)
 print(f"[gpio] GPIO {GPIO_TO_ARDUINO_9} claimed as OUTPUT → Arduino pin 9")
 
+print(GPIO_TO_ARDUINO_7, GPIO_TO_ARDUINO_8, GPIO_TO_ARDUINO_9)
+
 
 # --- Send signals ---
 def send_signal(arduino_pin, gpio_pin, value):
     lgpio.gpio_write(chip, gpio_pin, value)
-    print(f"[gpio] GPIO {gpio_pin} → Arduino pin {arduino_pin} set {'HIGH' if value == 1 else 'LOW'}")
+    # print(f"[gpio] GPIO {gpio_pin} → Arduino pin {arduino_pin} set {'HIGH' if value == 1 else 'LOW'}")
 
 
 def get_zone(cx: int) -> str:
@@ -156,7 +161,7 @@ def main():
     picam2 = Picamera2()
 
     # Configure camera for RGB output
-    config = picam2.create_preview_configuration(main={"size": (FRAME_W, FRAME_H), "format": "RGB888"})
+    config = picam2.create_video_configuration(main={"size": (FRAME_W, FRAME_H), "format": "RGB888"})
     picam2.configure(config)
     picam2.start()
 
@@ -187,6 +192,14 @@ def main():
                         smoothed["cx"]     = int(sum(b[0] for b in box_history) / len(box_history))
                         smoothed["cy"]     = int(sum(b[1] for b in box_history) / len(box_history))
                         smoothed["radius"] = int(sum(b[2] for b in box_history) / len(box_history))
+                else:
+                    # No contours at all — clear history and reset
+                    box_history.clear()
+                    smoothed = {"cx": 0, "cy": 0, "radius": 0}
+            else:
+                # Hat left the frame entirely
+                box_history.clear()
+                smoothed = {"cx": 0, "cy": 0, "radius": 0} 
 
             if smoothed["radius"] > 0:
                 size = smoothed["radius"] * 2
@@ -194,6 +207,12 @@ def main():
                 zone = get_zone(smoothed["cx"])
                 action = CART_statemachine(distance_cm, zone)
                 print(f"Zone: {zone} | Dist: {distance_cm} cm | Action: {action}")
+            else:
+                # No target detected — explicitly stop motors
+                send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+                send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+                send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+                print("No target detected | Action: stopAll")
 
     except KeyboardInterrupt:
         print("Exiting...")
