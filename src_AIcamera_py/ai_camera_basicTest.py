@@ -44,8 +44,8 @@ LOWER_ORANGE2 = np.array([100, 175, 120])
 UPPER_ORANGE2 = np.array([120, 255, 250])
 
 # 2. CAMERA AND FRAME SETTINGS
-FRAME_W = 700
-FRAME_H = 400
+FRAME_W = 1280 #700
+FRAME_H = 720 #400
 CENTER_X = FRAME_W // 2
 CENTER_Y = FRAME_H // 2
 
@@ -86,59 +86,66 @@ def get_zone(cx: int) -> str:
 
 
 def CART_statemachine(distance_cm, zone):
+    distance1 = 75
+    distance2 = 200
+    distance3 = 325
+    distance4 = 400
+
+    # If target is too far regardless of zone, stop
+    if distance_cm > distance4:
+        send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+        send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+        send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+        print("stopAll - out of range\n")
+        return "stopAll"
+
     # Steering takes priority — correct heading first
     if zone == "LEFT":
-        # RC.turnLeft(int(speed * 1.3))
         send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
         send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
         send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
         print("turnLeft\n")
         return "turnLeft"
+
     elif zone == "RIGHT":
-        # RC.turnRight(int(speed * 1.3))
         send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
         send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
         send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
         print("turnRight\n")
         return "turnRight"
-    else:
-        # Only reach here if zone == "MIDDLE"
-        if distance_cm < 100:
-            # RC.stopAll()
+
+    elif zone == "MIDDLE":
+        if distance_cm < distance1:
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
             print("stopAll\n")
             return "stopAll"
-        elif 100 <= distance_cm < 200:
-            # RC.moveForward(speed)
+        elif distance_cm < distance2:
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
             print("moveForward\n")
             return "moveForward"
-        elif 200 <= distance_cm < 300:
-            # RC.moveForward(speed * 1.5)
+        elif distance_cm < distance3:
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
             print("moveForward_1.5x\n")
             return "moveForward_1.5x"
-        elif 300 <= distance_cm < 400:
-            # RC.moveForward(speed * 2)
+        else:  # distance3 <= distance_cm <= distance4
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
             print("moveForward_2x\n")
             return "moveForward_2x"
-        else:
-            # RC.stopAll()
-            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
-            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
-            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
-            print("")
-            return "stopAll"
-        
+
+    # Unknown zone
+    send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+    send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+    send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+    print("stopAll - unknown zone\n")
+    return "stopAll"
 
 
 def calculate_distance(apparent_width_px: int) -> float:

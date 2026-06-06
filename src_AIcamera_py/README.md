@@ -111,3 +111,19 @@ dtparam=uart0=off
 enable_uart=0
 dtoverlay=uart3-pi5
 ```
+
+
+#### 3. Taking screenshots and data of AI camera
+
+These bash commands are used to take screenshots of the AI camera output.
+
+```bash
+# Full screenshot
+grim /home/cartproject/Documents/aluan-CART-project_ucsc-ece129/src_AIcamera_py/screenshot_$(date +%Y%m%d_%H%M%S).png
+
+# Select a region
+grim -g "$(slurp)" /home/cartproject/Documents/aluan-CART-project_ucsc-ece129/src_AIcamera_py/screenshot_$(date +%Y%m%d_%H%M%S).png
+
+# Screenshot to clipboard
+grim - | wl-copy
+```
