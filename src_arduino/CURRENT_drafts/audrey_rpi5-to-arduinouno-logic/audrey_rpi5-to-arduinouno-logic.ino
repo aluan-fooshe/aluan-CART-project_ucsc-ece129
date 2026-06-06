@@ -88,10 +88,10 @@ const char* rpi_to_motors(int val7, int val8, int val9) {
       return "stopAll";
   } else if (cmd == 0b001) {
       turnLeft(RC_ADDRESS, clampedSpeed(1.5));
-      return "dir1";
+      return "turnLeft";
   } else if (cmd == 0b010) {
       turnRight(RC_ADDRESS, clampedSpeed(1.5));
-      return "dir2";
+      return "turnRight";
   } else if (cmd == 0b011) {
       moveForward(RC_ADDRESS, speed);
       return "moveForward";
