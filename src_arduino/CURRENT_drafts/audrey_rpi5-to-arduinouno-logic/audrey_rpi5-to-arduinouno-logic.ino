@@ -32,7 +32,8 @@ struct ThreeBit {
   uint8_t val9 : 1;
 };
 
-uint8_t speed = 30;
+uint8_t speed = 12;
+const char* cartAction = "";
 
 void moveForward(uint8_t address, uint8_t speed) {
   roboclawFront.ForwardM1(address, speed);
@@ -73,7 +74,7 @@ uint8_t clampedSpeed(float multiplier) {
     return (uint8_t)(min((int)(speed * multiplier), 127));
 }
 
-void rpi_to_motors(int val7, int val8, int val9) {
+const char* rpi_to_motors(int val7, int val8, int val9) {
     uint8_t cmd = (val7 << 2) | (val8 << 1) | val9;
     //  cmd = 0b000 (0) → val7=0, val8=0, val9=0 → stopAll
     //  cmd = 0b001 (1) → val7=0, val8=0, val9=1 → turnLeft(speed*1.5)
@@ -84,20 +85,25 @@ void rpi_to_motors(int val7, int val8, int val9) {
 
     if (cmd == 0b000) {
       stopAll();
+      return "stopAll";
   } else if (cmd == 0b001) {
-      // turnLeft(RC_ADDRESS, clampedSpeed(1.5));
-      turnRight(RC_ADDRESS, clampedSpeed(1.5));
-  } else if (cmd == 0b010) {
-      // turnRight(RC_ADDRESS, clampedSpeed(1.5));
       turnLeft(RC_ADDRESS, clampedSpeed(1.5));
+      return "dir1";
+  } else if (cmd == 0b010) {
+      turnRight(RC_ADDRESS, clampedSpeed(1.5));
+      return "dir2";
   } else if (cmd == 0b011) {
       moveForward(RC_ADDRESS, speed);
+      return "moveForward";
   } else if (cmd == 0b100) {
       moveForward(RC_ADDRESS, clampedSpeed(1.5));
+      return "moveForward_1.5x";
   } else if (cmd == 0b101) {
       moveForward(RC_ADDRESS, clampedSpeed(2.0));
+      return "moveForward_2.0x";
   } else {
       stopAll();
+      return "stopAll";
   }
 }
 
@@ -126,9 +132,11 @@ void loop() {
     int val7 = digitalRead(PI_INPUT_PIN_7);
     int val8 = digitalRead(PI_INPUT_PIN_8);
     int val9 = digitalRead(PI_INPUT_PIN_9);
-    Serial.print("Pin7-8-9: "); Serial.print(val7); 
-    Serial.print(val8); Serial.println(val9);
 
-    rpi_to_motors(val7, val8, val9);
+    cartAction = rpi_to_motors(val7, val8, val9);
+
+    Serial.print("Pin7-8-9: "); Serial.print(val7); 
+    Serial.print(val8); Serial.print(val9); Serial.print("   "); Serial.println(cartAction);
+
     delay(100);
 }
