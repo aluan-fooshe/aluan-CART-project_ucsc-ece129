@@ -1,0 +1,14 @@
+[Unit]
+Description=AI Camera Headless
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/cartproject/Documents/aluan-CART-project_ucsc-ece129/src_AIcamera_py/ai_camera_headless.py
+Restart=always
+RestartSec=5
+User=cartproject
+WorkingDirectory=/home/cartproject
+
+[Install]
+WantedBy=multi-user.target
