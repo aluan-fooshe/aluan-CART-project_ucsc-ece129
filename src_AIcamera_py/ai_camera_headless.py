@@ -14,9 +14,14 @@ import signal
 # sudo systemctl enable ai_camera_headless.service
 # sudo journalctl -u ai_camera_headless.service -f
 
-# Open the GPIO chip (Pi 5 uses chip 4)
-chip = lgpio.gpiochip_open(4)
-print("[gpio] Chip opened successfully")
+# # Open the GPIO chip (Pi 5 uses chip 4)
+# chip = lgpio.gpiochip_open(4)
+# print("[gpio] Chip opened successfully")
+
+chip = lgpio.gpiochip_open(0)
+lgpio.gpio_claim_output(chip, 14, 0)  # drive LOW immediately
+lgpio.gpio_claim_output(chip, 15, 0)
+lgpio.gpio_claim_output(chip, 9, 0)
 
 # --- Declare pins ---
 # Pi GPIO 14 (pin 8)  → Arduino pin 7
