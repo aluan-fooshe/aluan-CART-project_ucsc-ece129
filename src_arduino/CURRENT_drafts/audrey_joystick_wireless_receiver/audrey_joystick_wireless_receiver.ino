@@ -25,13 +25,19 @@ RoboClaw roboclawBack(&backSerial, 100);
 #define Kd 0.25
 #define QPPS 100
 
-uint8_t given_speed = 40;
+uint8_t given_speed = 30;
 
 //Joystick Data
 struct JoystickData {
   int xValue;
   int yValue;
 };
+
+#define PI_INPUT_PIN_7 7
+#define PI_INPUT_PIN_8 8
+#define PI_INPUT_PIN_9 9
+const char* cartAction = "";
+bool aiCameraMode = false;  // false = joystick, true = AI camera
 
 // -------------------------------------------------------
 //   Triple-Back Pattern Detection (Audrey)
@@ -125,6 +131,10 @@ void stopAll() {
 
 //setup function
 void setup() {
+  pinMode(PI_INPUT_PIN_7, INPUT);
+  pinMode(PI_INPUT_PIN_8, INPUT);
+  pinMode(PI_INPUT_PIN_9, INPUT);
+
   Serial.begin(9600);
   
 //RF Stuff
@@ -153,53 +163,126 @@ void setup() {
 }
 
 
+// -------------------------------------------------------
+// AI Camera Mode functions
+// -------------------------------------------------------
+
+uint8_t clampedSpeed(float multiplier) {
+    return (uint8_t)(min((int)(given_speed * multiplier), 127));
+}
+
+const char* rpi_to_motors(int val7, int val8, int val9) {
+    uint8_t cmd = (val7 << 2) | (val8 << 1) | val9;
+    //  cmd = 0b000 (0) → val7=0, val8=0, val9=0 → stopAll
+    //  cmd = 0b001 (1) → val7=0, val8=0, val9=1 → turnLeft(speed*1.5)
+    //  cmd = 0b010 (2) → val7=0, val8=1, val9=0 → turnRight(speed*1.5)
+    //  cmd = 0b011 (3) → val7=0, val8=1, val9=1 → moveForward(speed)
+    //  cmd = 0b100 (4) → val7=1, val8=0, val9=0 → moveForward(speed*1.5)
+    //  cmd = 0b101 (5) → val7=1, val8=0, val9=1 → moveForward(speed*2.0)
+
+    if (cmd == 0b000) {
+      stopAll();
+      return "stopAll";
+  } else if (cmd == 0b001) {
+      turnLeft(RC_ADDRESS, clampedSpeed(1.5));
+      return "turnLeft";
+  } else if (cmd == 0b010) {
+      turnRight(RC_ADDRESS, clampedSpeed(1.5));
+      return "turnRight";
+  } else if (cmd == 0b011) {
+      moveForward(RC_ADDRESS, given_speed);
+      return "moveForward";
+  } else if (cmd == 0b100) {
+      moveForward(RC_ADDRESS, clampedSpeed(1.5));
+      return "moveForward_1.5x";
+  } else if (cmd == 0b101) {
+      moveForward(RC_ADDRESS, clampedSpeed(2.0));
+      return "moveForward_2.0x";
+  } else {
+      stopAll();
+      return "stopAll";
+  }
+}
+
+// -------------------------------------------------------
+// MAIN FUNCTION
+// -------------------------------------------------------
+
 void loop() {
-  
-  // 0 - 511 - 1023
   bool got_signal = radio.available();
-  
-  if (got_signal) {
+
+  if (aiCameraMode) {
+    // Run Pi GPIO regardless of joystick signal
+    int val7 = digitalRead(PI_INPUT_PIN_7);
+    int val8 = digitalRead(PI_INPUT_PIN_8);
+    int val9 = digitalRead(PI_INPUT_PIN_9);
+    cartAction = rpi_to_motors(val7, val8, val9);
+    Serial.print("AI CAM | Pin7-8-9: ");
+    Serial.print(val7); Serial.print(val8); Serial.println(val9);
+
+    // Only check joystick for mode switch if signal is available
+    if (got_signal) {
+      JoystickData data;
+      radio.read(&data, sizeof(data));
+      Serial.print("X: "); Serial.print(data.xValue);
+      Serial.print(" Y: "); Serial.println(data.yValue);
+
+      int currentState = -1;
+      if (data.xValue <= 100) {
+        Serial.println("SWITCH STATE CASE");
+        currentState = 1;
+      } else {
+        currentState = 0;
+      }
+
+      if (checkTripleBackPattern(currentState)) {
+        aiCameraMode = !aiCameraMode;
+        Serial.print("*** MODE SWITCH: ");
+        Serial.println(aiCameraMode ? "AI CAMERA" : "JOYSTICK");
+        stopAll();
+      }
+    }
+
+  } else if (got_signal) {   // ← joystick mode
     JoystickData data;
     radio.read(&data, sizeof(data));
+    Serial.print("X: "); Serial.print(data.xValue);
+    Serial.print(" Y: "); Serial.println(data.yValue);
 
-    Serial.print("X: ");
-    Serial.print(data.xValue);
-    Serial.print(" Y: ");
-    Serial.println(data.yValue);
-
-    int currentState = -1;  // -1 = neither back nor stop (forward/turn)
+    int currentState = -1;
 
     if (data.xValue > 600 && data.xValue < 900) {
-      Serial.print("Forward | Speed: ");
-      Serial.println(given_speed);
+      Serial.print("Forward | Speed: "); Serial.println(given_speed);
       moveForward(RC_ADDRESS, given_speed);
-  } else if (data.xValue >= 900) {
+    } else if (data.xValue >= 900) {
       uint8_t fast_speed = (uint8_t)(
         given_speed + ((long)(data.xValue - 900) * given_speed / 123)
       );
-      Serial.print("FAST Forward | Speed: ");
-      Serial.println(fast_speed);
+      Serial.print("FAST Forward | Speed: "); Serial.println(fast_speed);
       moveForward(RC_ADDRESS, fast_speed);
-  } else if (data.xValue < 400) {
+    } else if (data.xValue < 400 && data.xValue > 100) {
       Serial.println("Backward");
       moveBackward(RC_ADDRESS, given_speed);
-      currentState = 1;  // BACK
-  } else if (data.yValue < 400) {
+    } else if (data.xValue <= 100) {
+      Serial.println("SWITCH STATE CASE");
+      currentState = 1;
+    } else if (data.yValue < 400) {
       Serial.println("Turn Left");
       turnLeft(RC_ADDRESS, given_speed);
-  } else if (data.yValue > 600) {
+    } else if (data.yValue > 600) {
       Serial.println("Turn Right");
       turnRight(RC_ADDRESS, given_speed);
-  } else {
+    } else {
       Serial.println("Stopped");
       stopAll();
-      currentState = 0;  // STOP
-  }
+      currentState = 0;
+    }
 
     if (checkTripleBackPattern(currentState)) {
-      Serial.println("*** TRIPLE BACK PATTERN DETECTED ***");
-      // >>> YOUR ACTION HERE <
-      // transitions between the two modes AI_camera and this joystick code script
+      aiCameraMode = !aiCameraMode;
+      Serial.print("*** MODE SWITCH: ");
+      Serial.println(aiCameraMode ? "AI CAMERA" : "JOYSTICK");
+      stopAll();
     }
 
   } else {
