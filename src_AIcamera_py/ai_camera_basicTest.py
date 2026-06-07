@@ -84,15 +84,14 @@ def get_zone(cx: int) -> str:
     else:
         return "RIGHT"
 
-
 def CART_statemachine(distance_cm, zone):
-    distance1 = 75
-    distance2 = 200
-    distance3 = 325
-    distance4 = 400
+    d1 = 75
+    d2 = 200
+    d3 = 325
+    d4 = 400
 
     # If target is too far regardless of zone, stop
-    if distance_cm > distance4:
+    if distance_cm > d4:
         send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
         send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
         send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
@@ -115,25 +114,25 @@ def CART_statemachine(distance_cm, zone):
         return "turnRight"
 
     elif zone == "MIDDLE":
-        if distance_cm < distance1:
+        if distance_cm < d1:
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
             print("stopAll\n")
             return "stopAll"
-        elif distance_cm < distance2:
+        elif distance_cm < d2:
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
             print("moveForward\n")
             return "moveForward"
-        elif distance_cm < distance3:
+        elif distance_cm < d3:
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
             print("moveForward_1.5x\n")
             return "moveForward_1.5x"
-        else:  # distance3 <= distance_cm <= distance4
+        else:  # d3 <= distance_cm <= d4
             send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
             send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
             send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
