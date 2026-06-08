@@ -13,7 +13,7 @@ const byte address[6] = "00001";
 // -------------------------------------------------------
 SoftwareSerial frontSerial(3, 4);  // FRONT MOTORS PAIR: RX (yellow), TX (orange)
 RoboClaw roboclawFront(&frontSerial, 100);
-SoftwareSerial backSerial(5, 6);   // BACK MOTORS PAIR: RX (yellow), TX (orange)
+SoftwareSerial backSerial(5, 6);   *// BACK MOTORS PAIR: RX (yellow), TX (orange)
 RoboClaw roboclawBack(&backSerial, 100);
 
 #define RC_ADDRESS 0x80
