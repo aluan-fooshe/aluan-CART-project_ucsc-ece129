@@ -13,7 +13,7 @@ const byte address[6] = "00001";
 // -------------------------------------------------------
 SoftwareSerial frontSerial(3, 4);  // FRONT MOTORS PAIR: RX (yellow), TX (orange)
 RoboClaw roboclawFront(&frontSerial, 100);
-SoftwareSerial backSerial(5, 6);   *// BACK MOTORS PAIR: RX (yellow), TX (orange)
+SoftwareSerial backSerial(5, 6);   // BACK MOTORS PAIR: RX (yellow), TX (orange)
 RoboClaw roboclawBack(&backSerial, 100);
 
 #define RC_ADDRESS 0x80
@@ -147,7 +147,7 @@ void setup() {
   radio.setPALevel(RF24_PA_LOW); // Match with transmitter
   radio.startListening();        // RECEIVER
   
-//Motorcontroller Stuff (Audrey)
+  //Motorcontroller Stuff (Audrey)
   frontSerial.begin(BAUDRATE);  
   roboclawFront.begin(BAUDRATE);
   backSerial.begin(BAUDRATE);
@@ -211,6 +211,7 @@ const char* rpi_to_motors(int val7, int val8, int val9) {
 void loop() {
   bool got_signal = radio.available();
 
+  // ---------------- AI CAMERA MODE ---------------------
   if (aiCameraMode) {
     // Run Pi GPIO regardless of joystick signal
     int val7 = digitalRead(PI_INPUT_PIN_7);
@@ -243,7 +244,8 @@ void loop() {
       }
     }
 
-  } else if (got_signal) {   // ← joystick mode
+  // ---------------- JOYSTICK MODE ---------------------
+  } else if (got_signal) {
     JoystickData data;
     radio.read(&data, sizeof(data));
     Serial.print("X: "); Serial.print(data.xValue);
@@ -251,27 +253,48 @@ void loop() {
 
     int currentState = -1;
 
+    // range 600 - 900: range width is 300
     if (data.xValue > 600 && data.xValue < 900) {
-      Serial.print("Forward | Speed: "); Serial.println(given_speed);
-      moveForward(RC_ADDRESS, given_speed);
+      uint8_t slow_FWDspeed = (uint8_t)(
+        0 + ((long)(data.xValue - 600) * given_speed / 300)
+      );
+      Serial.print("Forward | Speed: "); Serial.println(slow_FWDspeed);
+      moveForward(RC_ADDRESS, slow_FWDspeed);
+
+    // range 900 - 1023: range width is 123
     } else if (data.xValue >= 900) {
       uint8_t fast_speed = (uint8_t)(
         given_speed + ((long)(data.xValue - 900) * given_speed / 123)
       );
       Serial.print("FAST Forward | Speed: "); Serial.println(fast_speed);
       moveForward(RC_ADDRESS, fast_speed);
+
     } else if (data.xValue < 400 && data.xValue > 100) {
-      Serial.println("Backward");
-      moveBackward(RC_ADDRESS, given_speed);
+      uint8_t BKWD_speed = (uint8_t)(
+        0 + ((long)(400 - data.xValue) * given_speed / 300)
+      );
+      Serial.print("Backward | Speed: "); Serial.println(BKWD_speed);
+      moveBackward(RC_ADDRESS, BKWD_speed);
+      // NOTE: currentState intentionally NOT set here
+
     } else if (data.xValue <= 100) {
       Serial.println("SWITCH STATE CASE");
       currentState = 1;
+
     } else if (data.yValue < 400) {
-      Serial.println("Turn Left");
-      turnLeft(RC_ADDRESS, given_speed);
+      uint8_t turn_speed = (uint8_t)(
+        (long)(400 - data.yValue) * given_speed / 400
+      );
+      Serial.print("Turn Left | Speed: "); Serial.println(turn_speed);
+      turnLeft(RC_ADDRESS, turn_speed);
+
     } else if (data.yValue > 600) {
-      Serial.println("Turn Right");
-      turnRight(RC_ADDRESS, given_speed);
+      uint8_t turn_speed = (uint8_t)(
+        (long)(data.yValue - 600) * given_speed / 400
+      );
+      Serial.print("Turn Right | Speed: "); Serial.println(turn_speed);
+      turnRight(RC_ADDRESS, turn_speed);
+
     } else {
       Serial.println("Stopped");
       stopAll();
