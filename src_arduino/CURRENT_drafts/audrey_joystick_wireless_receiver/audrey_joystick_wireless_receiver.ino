@@ -180,38 +180,47 @@ const char* decode_pi_pins(int val7, int val8, int val9) {
 
 // Returns the speed value
 uint8_t rpi_to_motors(int val7, int val8, int val9) {
-    uint8_t cmd = (val7 << 2) | (val8 << 1) | val9;
-    //  cmd = 0b000 (0) → val7=0, val8=0, val9=0 → stopAll
-    //  cmd = 0b001 (1) → val7=0, val8=0, val9=1 → turnLeft(speed*1.5)
-    //  cmd = 0b010 (2) → val7=0, val8=1, val9=0 → turnRight(speed*1.5)
-    //  cmd = 0b011 (3) → val7=0, val8=1, val9=1 → moveForward(speed)
-    //  cmd = 0b100 (4) → val7=1, val8=0, val9=0 → moveForward(speed*1.5)
-    //  cmd = 0b101 (5) → val7=1, val8=0, val9=1 → moveForward(speed*2.0)
-    //  cmd = 0b110 (6) → val7=1, val8=1, val9=0 → ForwardLeft(speed)
-    //  cmd = 0b111 (7) → val7=1, val8=1, val9=1 → ForwardRight(speed)
+  uint8_t cmd = (val7 << 2) | (val8 << 1) | val9;
+  //  cmd = 0b000 (0) → val7=0, val8=0, val9=0 → stopAll
+  //  cmd = 0b001 (1) → val7=0, val8=0, val9=1 → turnLeft(speed*1.5)
+  //  cmd = 0b010 (2) → val7=0, val8=1, val9=0 → turnRight(speed*1.5)
+  //  cmd = 0b011 (3) → val7=0, val8=1, val9=1 → moveForward(speed)
+  //  cmd = 0b100 (4) → val7=1, val8=0, val9=0 → moveForward(speed*1.5)
+  //  cmd = 0b101 (5) → val7=1, val8=0, val9=1 → moveForward(speed*2.0)
+  //  cmd = 0b110 (6) → val7=1, val8=1, val9=0 → ForwardLeft(speed)
+  //  cmd = 0b111 (7) → val7=1, val8=1, val9=1 → ForwardRight(speed)
 
-    if (cmd == 0b000) {
-      stopAll();
-      return 0;
-  } else if (cmd == 0b001) {
-      turnLeft(RC_ADDRESS, clampedSpeed(1.5));
-      return clampedSpeed(1.5);
-  } else if (cmd == 0b010) {
-      turnRight(RC_ADDRESS, clampedSpeed(1.5));
-      return clampedSpeed(1.5);
-  } else if (cmd == 0b011) {
-      moveForward(RC_ADDRESS, given_speed);
-      return given_speed;
-  } else if (cmd == 0b100) {
-      moveForward(RC_ADDRESS, clampedSpeed(1.5));
-      return clampedSpeed(1.5);
-  } else if (cmd == 0b101) {
-      moveForward(RC_ADDRESS, clampedSpeed(2.0));
-      return clampedSpeed(2.0);
-  } else {
-      stopAll();
-      return 0;
+  uint8_t targetSpeed;
+  int8_t  targetDir;
+
+  switch (cmd) {
+    case 0b001: targetSpeed = clampedSpeed(1.5); targetDir =  2; break;  // turnLeft
+    case 0b010: targetSpeed = clampedSpeed(1.5); targetDir = -2; break;  // turnRight
+    case 0b011: targetSpeed = given_speed;        targetDir =  1; break;  // fwd
+    case 0b100: targetSpeed = clampedSpeed(1.5);  targetDir =  1; break;  // fwd 1.5x
+    case 0b101: targetSpeed = clampedSpeed(2.0);  targetDir =  1; break;  // fwd 2.0x
+    default:    targetSpeed = 0;                  targetDir =  0; break;  // stop
   }
+
+  // If direction changed, ramp down to 0 first before applying new direction
+    if (targetDir != currentDir && currentSpeed > 0) {
+        currentSpeed = rampToward(currentSpeed, 0);
+        // apply stop while transitioning
+        stopAll();
+        return currentSpeed;  // ← exit early, don't switch direction yet
+    }
+
+    // Only reach here once currentSpeed has hit 0, or direction is unchanged
+    currentDir   = targetDir;
+    currentSpeed = rampToward(currentSpeed, targetSpeed);
+
+    switch (currentDir) {
+        case  1: moveForward (RC_ADDRESS, currentSpeed); return currentSpeed;
+        case -1: moveBackward(RC_ADDRESS, currentSpeed); return currentSpeed;
+        case  2: turnLeft    (RC_ADDRESS, currentSpeed); return currentSpeed;
+        case -2: turnRight   (RC_ADDRESS, currentSpeed); return currentSpeed;
+        default: stopAll();                              return currentSpeed;
+    }
 }
 
 // -------------------------------------------------------
