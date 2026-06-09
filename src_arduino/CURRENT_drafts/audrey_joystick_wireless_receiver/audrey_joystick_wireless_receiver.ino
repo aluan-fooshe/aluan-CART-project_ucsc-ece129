@@ -150,7 +150,8 @@ const char* decode_pi_pins(int val7, int val8, int val9) {
   else return "stopAll";
 }
 
-const char* rpi_to_motors(int val7, int val8, int val9) {
+// Returns the speed value
+uint8_t rpi_to_motors(int val7, int val8, int val9) {
     uint8_t cmd = (val7 << 2) | (val8 << 1) | val9;
     //  cmd = 0b000 (0) → val7=0, val8=0, val9=0 → stopAll
     //  cmd = 0b001 (1) → val7=0, val8=0, val9=1 → turnLeft(speed*1.5)
@@ -161,25 +162,25 @@ const char* rpi_to_motors(int val7, int val8, int val9) {
 
     if (cmd == 0b000) {
       stopAll();
-      return "stopAll";
+      return 0;
   } else if (cmd == 0b001) {
       turnLeft(RC_ADDRESS, clampedSpeed(1.5));
-      return "turnLeft";
+      return clampedSpeed(1.5);
   } else if (cmd == 0b010) {
       turnRight(RC_ADDRESS, clampedSpeed(1.5));
-      return "turnRight";
+      return clampedSpeed(1.5);
   } else if (cmd == 0b011) {
       moveForward(RC_ADDRESS, given_speed);
-      return "moveForward";
+      return given_speed;
   } else if (cmd == 0b100) {
       moveForward(RC_ADDRESS, clampedSpeed(1.5));
-      return "moveForward_1.5x";
+      return clampedSpeed(1.5);
   } else if (cmd == 0b101) {
       moveForward(RC_ADDRESS, clampedSpeed(2.0));
-      return "moveForward_2.0x";
+      return clampedSpeed(2.0);
   } else {
       stopAll();
-      return "stopAll";
+      return 0;
   }
 }
 
@@ -251,6 +252,7 @@ void loop() {
   unsigned long timestamp = (millis() - startTime);
   JoystickData data = {0, 0};  // safe default
   int currentState = -1;
+  cartAction = decode_pi_pins(val7, val8, val9);
 
   // Run Pi GPIO regardless of joystick signal
   int val7 = digitalRead(PI_INPUT_PIN_7);
@@ -259,14 +261,13 @@ void loop() {
 
   // ---------------- AI CAMERA MODE ---------------------
   if (aiCameraMode) {
-    cartAction = rpi_to_motors(val7, val8, val9);
-
+    uint8_t CART_speed = rpi_to_motors(val7, val8, val9);
     // Only check joystick for mode switch if signal is available
     if (got_signal) {
       radio.read(&data, sizeof(data));
       // void logTelemetry(unsigned long timestamp, const char* action, uint8_t speed, 
       // int val7, int val8, int val9, JoystickData data, int patternDetected, bool aiCameraMode)
-      logTelemetry(timestamp, cartAction, 0, 
+      logTelemetry(timestamp, cartAction, CART_speed, 
       val7, val8, val9, data, currentState, aiCameraMode);
 
       currentState = -1;
@@ -291,8 +292,6 @@ void loop() {
   // ---------------- JOYSTICK MODE ---------------------
   } else if (got_signal) {
     radio.read(&data, sizeof(data));
-
-    cartAction = decode_pi_pins(val7, val8, val9);
     
     // void logTelemetry(unsigned long timestamp, const char* action, uint8_t speed, 
     // int val7, int val8, int val9, JoystickData data, int patternDetected, bool aiCameraMode)
