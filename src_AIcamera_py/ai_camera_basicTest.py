@@ -100,18 +100,34 @@ def CART_statemachine(distance_cm, zone):
 
     # Steering takes priority — correct heading first
     if zone == "LEFT":
-        send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
-        send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
-        send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
-        print("turnLeft\n")
-        return "turnLeft"
+        if distance_cm < d2:
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=0)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
+            print("turnLeft")
+            return "turnLeft"
+
+        else:
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+            print("ForwardLeft")
+            return "ForwardLeft"
 
     elif zone == "RIGHT":
-        send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
-        send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
-        send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
-        print("turnRight\n")
-        return "turnRight"
+        if distance_cm < d2:
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=0)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=0)
+            print("turnRight")
+            return "turnRight"
+
+        else:
+            send_signal(arduino_pin=7, gpio_pin=GPIO_TO_ARDUINO_7, value=1)
+            send_signal(arduino_pin=8, gpio_pin=GPIO_TO_ARDUINO_8, value=1)
+            send_signal(arduino_pin=9, gpio_pin=GPIO_TO_ARDUINO_9, value=1)
+            print("ForwardRight\n")
+            return "ForwardRight"
 
     elif zone == "MIDDLE":
         if distance_cm < d1:

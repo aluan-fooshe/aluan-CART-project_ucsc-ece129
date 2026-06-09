@@ -154,7 +154,7 @@ void stopAll() {
 uint8_t currentSpeed = 0;
 int8_t  currentDir   = 0;   // 1=fwd, -1=bwd, 0=stop, 2=left, -2=right
 
-#define RAMP_STEP 3          // speed units added per loop iteration (tune this)
+#define RAMP_STEP 2          // speed units added per loop iteration (tune this)
 
 uint8_t rampToward(uint8_t current, uint8_t target) {
     if (current < target) return min((int)current + RAMP_STEP, (int)target);
@@ -205,9 +205,8 @@ uint8_t rpi_to_motors(int val7, int val8, int val9) {
   // If direction changed, ramp down to 0 first before applying new direction
     if (targetDir != currentDir && currentSpeed > 0) {
         currentSpeed = rampToward(currentSpeed, 0);
-        // apply stop while transitioning
         stopAll();
-        return currentSpeed;  // ← exit early, don't switch direction yet
+        return currentSpeed;  // still ramping down
     }
 
     // Only reach here once currentSpeed has hit 0, or direction is unchanged
