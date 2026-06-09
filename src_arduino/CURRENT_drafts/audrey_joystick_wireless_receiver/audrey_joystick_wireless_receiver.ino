@@ -114,10 +114,26 @@ void turnRight(uint8_t address, uint8_t speed, int delay_time = 0) {
   if (delay_time > 0) delay(delay_time);
 }
 
+void ForwardRight(uint8_t address, uint8_t speed, int delay_time = 0) {
+  roboclawFront.ForwardM1(address, speed);
+  roboclawFront.ForwardM2(address, speed/2);
+  roboclawBack.ForwardM1(address, speed);
+  roboclawBack.ForwardM2(address, speed/2);
+  if (delay_time > 0) delay(delay_time);
+}
+
 void turnLeft(uint8_t address, uint8_t speed, int delay_time = 0) {
   roboclawFront.BackwardM1(address, speed);
   roboclawFront.ForwardM2(address, speed);
   roboclawBack.BackwardM1(address, speed);
+  roboclawBack.ForwardM2(address, speed);
+  if (delay_time > 0) delay(delay_time);
+}
+
+void ForwardLeft(uint8_t address, uint8_t speed, int delay_time = 0) {
+  roboclawFront.ForwardM1(address, speed/2);
+  roboclawFront.ForwardM2(address, speed);
+  roboclawBack.ForwardM1(address, speed/2);
   roboclawBack.ForwardM2(address, speed);
   if (delay_time > 0) delay(delay_time);
 }
@@ -133,6 +149,18 @@ void stopAll() {
 // -------------------------------------------------------
 // AI Camera Mode functions
 // -------------------------------------------------------
+
+// Ramping state
+uint8_t currentSpeed = 0;
+int8_t  currentDir   = 0;   // 1=fwd, -1=bwd, 0=stop, 2=left, -2=right
+
+#define RAMP_STEP 3          // speed units added per loop iteration (tune this)
+
+uint8_t rampToward(uint8_t current, uint8_t target) {
+    if (current < target) return min((int)current + RAMP_STEP, (int)target);
+    if (current > target) return max((int)current - RAMP_STEP, (int)target);
+    return current;
+}
 
 uint8_t clampedSpeed(float multiplier) {
     return (uint8_t)(min((int)(given_speed * multiplier), 127));
@@ -159,6 +187,8 @@ uint8_t rpi_to_motors(int val7, int val8, int val9) {
     //  cmd = 0b011 (3) → val7=0, val8=1, val9=1 → moveForward(speed)
     //  cmd = 0b100 (4) → val7=1, val8=0, val9=0 → moveForward(speed*1.5)
     //  cmd = 0b101 (5) → val7=1, val8=0, val9=1 → moveForward(speed*2.0)
+    //  cmd = 0b110 (6) → val7=1, val8=1, val9=0 → ForwardLeft(speed)
+    //  cmd = 0b111 (7) → val7=1, val8=1, val9=1 → ForwardRight(speed)
 
     if (cmd == 0b000) {
       stopAll();
@@ -252,12 +282,13 @@ void loop() {
   unsigned long timestamp = (millis() - startTime);
   JoystickData data = {0, 0};  // safe default
   int currentState = -1;
-  cartAction = decode_pi_pins(val7, val8, val9);
 
   // Run Pi GPIO regardless of joystick signal
   int val7 = digitalRead(PI_INPUT_PIN_7);
   int val8 = digitalRead(PI_INPUT_PIN_8);
   int val9 = digitalRead(PI_INPUT_PIN_9);
+
+  cartAction = decode_pi_pins(val7, val8, val9);
 
   // ---------------- AI CAMERA MODE ---------------------
   if (aiCameraMode) {
@@ -298,51 +329,61 @@ void loop() {
 
     currentState = -1;
 
-    // FORWARD range 600 - 900: range width is 300
-    if (data.xValue > 600 && data.xValue < 900) {
-      uint8_t slow_FWDspeed = (uint8_t)(
-        0 + ((long)(data.xValue - 600) * given_speed / 300)
-      );
-      logTelemetry(timestamp, "moveForward", slow_FWDspeed, val7, val8, val9, data, currentState, aiCameraMode);
-      moveForward(RC_ADDRESS, slow_FWDspeed);
-
-    // FAST FORWARD range 900 - 1023: range width is 123
-    } else if (data.xValue >= 900) {
-      uint8_t fast_FWDspeed = (uint8_t)(
-        given_speed + ((long)(data.xValue - 900) * given_speed / 123)
-      );
-      logTelemetry(timestamp, "moveForward_2.0x", fast_FWDspeed, val7, val8, val9, data, currentState, aiCameraMode);
-      moveForward(RC_ADDRESS, fast_FWDspeed);
-
-    // BACKWARD range 100 - 400: range width is 300
-    } else if (data.xValue < 400 && data.xValue > 100) {
-      uint8_t BKWD_speed = (uint8_t)(0 + ((long)(400 - data.xValue) * given_speed / 300));
-      logTelemetry(timestamp, "moveBackward", BKWD_speed, val7, val8, val9, data, currentState, aiCameraMode);
-      moveBackward(RC_ADDRESS, BKWD_speed);
-      // NOTE: currentState intentionally NOT set here
-
-    // SWITCH STATE CASE
-    } else if (data.xValue <= 100) {
+    // SWITCH STATE
+    if (data.xValue <= 100) {
       currentState = 1;
       logTelemetry(timestamp, "SwitchState", 0, val7, val8, val9, data, currentState, aiCameraMode);
 
-    // BACKWARD range 100 - 400: range width is 300
+    // FORWARD-LEFT: both x and y active
+    } else if ((data.xValue > 600 && data.xValue < 900) && data.yValue < 400) {
+      uint8_t speed = (uint8_t)((long)(400 - data.yValue) * given_speed / 400);
+      logTelemetry(timestamp, "ForwardLeft", speed, val7, val8, val9, data, currentState, aiCameraMode);
+      ForwardLeft(RC_ADDRESS, speed);
+
+    // FORWARD-RIGHT: both x and y active
+    } else if ((data.xValue > 600 && data.xValue < 900) && data.yValue > 600) {
+      uint8_t speed = (uint8_t)((long)(data.yValue - 600) * given_speed / 423);
+      logTelemetry(timestamp, "ForwardRight", speed, val7, val8, val9, data, currentState, aiCameraMode);
+      ForwardRight(RC_ADDRESS, speed);
+
+    // FORWARD slow range 600-900
+    } else if (data.xValue > 600 && data.xValue < 900) {
+      uint8_t slow_FWDspeed = (uint8_t)((long)(data.xValue - 600) * given_speed / 300);
+      logTelemetry(timestamp, "moveForward", slow_FWDspeed, val7, val8, val9, data, currentState, aiCameraMode);
+      moveForward(RC_ADDRESS, slow_FWDspeed);
+
+    // FORWARD fast range 900-1023
+    } else if (data.xValue >= 900) {
+      uint8_t fast_FWDspeed = (uint8_t)(given_speed + ((long)(data.xValue - 900) * given_speed / 123));
+      logTelemetry(timestamp, "moveForward_2.0x", fast_FWDspeed, val7, val8, val9, data, currentState, aiCameraMode);
+      moveForward(RC_ADDRESS, fast_FWDspeed);
+
+    // BACKWARD range 100-400
+    } else if (data.xValue < 400 && data.xValue > 100) {
+      uint8_t BKWD_speed = (uint8_t)((long)(400 - data.xValue) * given_speed / 300);
+      logTelemetry(timestamp, "moveBackward", BKWD_speed, val7, val8, val9, data, currentState, aiCameraMode);
+      moveBackward(RC_ADDRESS, BKWD_speed);
+
+    // TURN LEFT
     } else if (data.yValue < 400) {
       uint8_t turn_speed = (uint8_t)((long)(400 - data.yValue) * given_speed / 400);
       logTelemetry(timestamp, "turnLeft", turn_speed, val7, val8, val9, data, currentState, aiCameraMode);
       turnLeft(RC_ADDRESS, turn_speed);
 
+    // TURN RIGHT
     } else if (data.yValue > 600) {
-      uint8_t turn_speed = (uint8_t)((long)(data.yValue - 600) * given_speed / 400);
+      uint8_t turn_speed = (uint8_t)((long)(data.yValue - 600) * given_speed / 423);
       logTelemetry(timestamp, "turnRight", turn_speed, val7, val8, val9, data, currentState, aiCameraMode);
       turnRight(RC_ADDRESS, turn_speed);
 
+    // STOP
     } else {
       stopAll();
       currentState = 0;
       logTelemetry(timestamp, "stopAll", 0, val7, val8, val9, data, currentState, aiCameraMode);
     }
 
+    // checks for JOYSTICK to AI CAMERA state
     if (checkDoubleBackPattern(currentState)) {
       aiCameraMode = !aiCameraMode;
       Serial.print("*** MODE SWITCH: ");
@@ -350,10 +391,9 @@ void loop() {
       stopAll();
     }
 
-  } else {
-    logTelemetry(timestamp, "NO_SIGNAL", 0, val7, val8, val9, data, currentState, aiCameraMode);
-    stopAll();
-  }
-
+    } else {
+      logTelemetry(timestamp, "NO_SIGNAL", 0, val7, val8, val9, data, currentState, aiCameraMode);
+      stopAll();
+    }
   delay(100);
 }
