@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7656814e-f277-445f-810a-c3bf88cc9e79" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Sftwre01_AICamera-headless.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sftwre02_AICamera-withCameraViewer.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MATLAB/plot_telemetry.m" beforeDir="false" afterPath="$PROJECT_DIR$/../MATLAB/plot_telemetry.m" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src_arduino/CURRENT_drafts/audrey_joystick_wireless_receiver/audrey_joystick_wireless_receiver.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../src_arduino/CURRENT_drafts/audrey_joystick_wireless_receiver/audrey_joystick_wireless_receiver.ino" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

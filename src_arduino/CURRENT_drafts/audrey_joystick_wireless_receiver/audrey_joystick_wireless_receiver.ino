@@ -202,24 +202,37 @@ uint8_t rpi_to_motors(int val7, int val8, int val9) {
     default:    targetSpeed = 0;                  targetDir =  0; break;  // stop
   }
 
-  // If direction changed, ramp down to 0 first before applying new direction
-    if (targetDir != currentDir && currentSpeed > 0) {
-        currentSpeed = rampToward(currentSpeed, 0);
-        stopAll();
-        return currentSpeed;  // still ramping down
+  // Direction changed or stopping — ramp down first
+  if (targetDir != currentDir || targetSpeed == 0) {
+    if (currentSpeed > 0) {
+      currentSpeed = rampToward(currentSpeed, 0);
+      // Re-issue current direction at reduced speed (don't call stopAll yet)
+      switch (currentDir) {
+        case  1: moveForward (RC_ADDRESS, currentSpeed); break;
+        case -1: moveBackward(RC_ADDRESS, currentSpeed); break;
+        case  2: turnLeft    (RC_ADDRESS, currentSpeed); break;
+        case -2: turnRight   (RC_ADDRESS, currentSpeed); break;
+      }
+      return currentSpeed;  // still ramping down
     }
+    // Only fully stop once speed has reached 0
+    currentDir   = targetDir;
+    currentSpeed = 0;
+    stopAll();
+    return 0;
+  }
 
     // Only reach here once currentSpeed has hit 0, or direction is unchanged
     currentDir   = targetDir;
     currentSpeed = rampToward(currentSpeed, targetSpeed);
 
-    switch (currentDir) {
-        case  1: moveForward (RC_ADDRESS, currentSpeed); return currentSpeed;
-        case -1: moveBackward(RC_ADDRESS, currentSpeed); return currentSpeed;
-        case  2: turnLeft    (RC_ADDRESS, currentSpeed); return currentSpeed;
-        case -2: turnRight   (RC_ADDRESS, currentSpeed); return currentSpeed;
-        default: stopAll();                              return currentSpeed;
-    }
+  switch (currentDir) {
+      case  1: moveForward (RC_ADDRESS, currentSpeed); return currentSpeed;
+      case -1: moveBackward(RC_ADDRESS, currentSpeed); return currentSpeed;
+      case  2: turnLeft    (RC_ADDRESS, currentSpeed); return currentSpeed;
+      case -2: turnRight   (RC_ADDRESS, currentSpeed); return currentSpeed;
+      default: stopAll();                              return currentSpeed;
+  }
 }
 
 // -------------------------------------------------------
@@ -343,13 +356,13 @@ void loop() {
       logTelemetry(timestamp, "SwitchState", 0, val7, val8, val9, data, currentState, aiCameraMode);
 
     // FORWARD-LEFT: both x and y active
-    } else if ((data.xValue > 600 && data.xValue < 900) && data.yValue < 400) {
+    } else if ((data.xValue > 600) && data.yValue < 400) {
       uint8_t speed = (uint8_t)((long)(400 - data.yValue) * given_speed / 400);
       logTelemetry(timestamp, "ForwardLeft", speed, val7, val8, val9, data, currentState, aiCameraMode);
       ForwardLeft(RC_ADDRESS, speed);
 
     // FORWARD-RIGHT: both x and y active
-    } else if ((data.xValue > 600 && data.xValue < 900) && data.yValue > 600) {
+    } else if ((data.xValue > 600) && data.yValue > 600) {
       uint8_t speed = (uint8_t)((long)(data.yValue - 600) * given_speed / 423);
       logTelemetry(timestamp, "ForwardRight", speed, val7, val8, val9, data, currentState, aiCameraMode);
       ForwardRight(RC_ADDRESS, speed);
