@@ -2,7 +2,7 @@
 #
 # Notes:    A Python implementation of the Arduino RF circuit for the CART project.
 #
-# Author(s): Jayant Dharwakar, Audrey Luan
+# Author(s): Audrey Luan
 #
 # Date Written: 2026-03-31 11:27PM
 # -----------------------------------------------------------------

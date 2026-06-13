@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7656814e-f277-445f-810a-c3bf88cc9e79" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Sftwre01_AICamera-headless.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sftwre02_AICamera-withCameraViewer.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MATLAB/plot_telemetry.m" beforeDir="false" afterPath="$PROJECT_DIR$/../MATLAB/plot_telemetry.m" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src_arduino/CURRENT_drafts/audrey_joystick_wireless_receiver/audrey_joystick_wireless_receiver.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../src_arduino/CURRENT_drafts/audrey_joystick_wireless_receiver/audrey_joystick_wireless_receiver.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sftwre01_AICamera-headless.md" beforeDir="false" afterPath="$PROJECT_DIR$/Sftwre01_AICamera-joystick-system.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sftwre02_AICamera-withCameraViewer.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src_ultrasonic_py/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src_ultrasonic_py/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src_ultrasonic_py/RF_simple_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/../src_ultrasonic_py/RF_simple_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,7 +31,7 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;rpi5&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Audrey/aluan_Github_folder/aluan-CART-project_ucsc-ece129/src_AIcamera_py&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Audrey/aluan_Github_folder/aluan-CART-project_ucsc-ece129/src_ultrasonic_py&quot;
   }
 }</component>
   <component name="RunManager">
